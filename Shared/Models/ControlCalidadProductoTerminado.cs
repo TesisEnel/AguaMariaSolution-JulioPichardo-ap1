@@ -13,7 +13,7 @@ namespace AguaMariaSolution.Shared.Models
         public int Id { get; set; }
         [Required]
         public DateTime Fecha { get; set; } = DateTime.Now;
-        [Required(ErrorMessage = "Campo Obligatorio")]
+
         [StringLength(500,ErrorMessage = "No puede exceder los 500 caracteres")]
         public string? AcciónTomada { get; set; }
         public int EmpleadoId { get; set; }
