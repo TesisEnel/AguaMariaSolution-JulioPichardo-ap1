@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 
 namespace AguaMariaSolution.Shared.Models
 {
-    internal class Parametros
+    public class Parametros
     {
         [Key]
-        int ParametroId { get; set; }
+        public int ParametroId { get; set; }
 
         [Required(ErrorMessage = "Debe ingresar la descripción del Parametro")]
-        string Descripción { get; set; }
+        public string? Descripción { get; set; }
 
         [Required(ErrorMessage = "Debe introducir el mínimo")]
-        int Mínimo { get; set; }
+        public int Mínimo { get; set; }
 
         [Required(ErrorMessage = "Debe introducir el máximo")]
-        int Máximo { get; set; }
+        public int Máximo { get; set; }
     }
 }
