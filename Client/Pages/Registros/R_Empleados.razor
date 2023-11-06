@@ -1,0 +1,171 @@
+﻿@page "/RegistroEmpleado";
+@page "/RegistroEmpleado/{Empleado:int}";
+@inject HttpClient httpClient
+@inject NotificationService notificationService;
+
+<EditForm Model="empleados" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header">
+            <h1>Registro Cliente</h1>
+        </div>
+        <div class="card-body">
+            <label>ID:</label>
+            <div class="input-group">
+                <InputNumber @bind-Value="empleados.EmpleadoId" class="id-input"></InputNumber>
+                <button type="button" class="btn btn-dark oi oi-magnifying-glass" @onclick="Buscar"></button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Nombre:</label>
+                    <InputText @bind-Value="empleados.Nombre" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => empleados.Nombre)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Apellido:</label>
+                    <InputText @bind-Value="empleados.Apellido" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => empleados.Apellido)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Email:</label>
+                    <InputText type="email" @bind-Value="empleados.Email" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => empleados.Email)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Dirección:</label>
+                    <InputText @bind-Value="empleados.Dirección" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => empleados.Dirección)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Teléfono:</label>
+                    <InputText @bind-Value="empleados.Teléfono" class="form-control" placeholder="Ej: 8095877789"></InputText>
+                    <ValidationMessage For="@(() => empleados.Teléfono)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Celular:</label>
+                    <InputText @bind-Value="empleados.Celular" class="form-control" placeholder="Ej: 8295877789"></InputText>
+                    <ValidationMessage For="@(() => empleados.Celular)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+        </div>
+    </div>
+</EditForm>
+
+
+@code
+{
+    [Parameter]
+
+    public int EmpleadoId { get; set; }
+
+    public Empleados empleados { get; set; } = new Empleados();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (EmpleadoId > 0)
+        {
+            this.empleados.EmpleadoId = EmpleadoId;
+            await Buscar();
+        }
+    }
+
+    public async Task Buscar()
+    {
+        var clienteIdEncontrado = (await httpClient.GetFromJsonAsync<List<Empleados>>($"api/Empleados"))!
+        .ToList()
+        .Any(c => c.EmpleadoId == empleados.EmpleadoId);
+        if (clienteIdEncontrado)
+        {
+            var clienteEncontrado = await httpClient.GetFromJsonAsync<Empleados>($"api/Empleados/{empleados.EmpleadoId}");
+            if (clienteEncontrado != null)
+            {
+                this.empleados = clienteEncontrado;
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se encontro ningun cliente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+    }
+
+    public async Task Guardar()
+    {
+        using var response = await httpClient.PostAsJsonAsync("api/Empleados", empleados);
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Guardar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        var clienteDevuelto = await response.Content.ReadFromJsonAsync<Empleados>();
+        if (clienteDevuelto is not null)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Cliente Guardado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            empleados = clienteDevuelto;
+            this.Nuevo();
+            StateHasChanged();
+        }
+    }
+
+    public void Nuevo()
+    {
+        this.empleados = new Empleados();
+    }
+
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/Empleados/{empleados.EmpleadoId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Eliminar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Cliente Eliminado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+
+        }
+        Nuevo();
+    }
+}

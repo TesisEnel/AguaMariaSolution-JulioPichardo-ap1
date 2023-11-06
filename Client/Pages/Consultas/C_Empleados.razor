@@ -1,0 +1,81 @@
+﻿@page "/ConsultaCliente";
+@inject HttpClient httpClient
+
+<div class="card-header row">
+    <label>Filtrar ID:</label>
+    <div class="col-md-6 input-group filter-input">
+        <InputNumber @bind-Value="Filtro" class="form-control"></InputNumber>
+        <div class="input-group-append">
+            <button type="button" class="btn btn-dark oi oi-magnifying-glass" @onclick="Buscar"></button>
+        </div>
+    </div>
+</div>
+
+@if (Empleados is not null)
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Empleado ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Tel&eacute;fono</th>
+                    <th>Celular</th>
+                    <th>Email</th>
+                    <th>Direcci&oacute;n</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var empleados in Empleados)
+                {
+                    <tr>
+                        <td>@empleados.EmpleadoId</td>
+                        <td>@empleados.Nombre</td>
+                        <td>@empleados.Apellido</td>
+                        <td>@empleados.Teléfono</td>
+                        <td>@empleados.Celular</td>
+                        <td>@empleados.Email</td>
+                        <td>@empleados.Dirección</td>
+                        <td><a href="RegistroEmpleado/@empleados.EmpleadoId">Ver</a></td>
+                    </tr>
+                }
+                <tr>
+                    <td>Conteo: @Conteo</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+
+@code {
+
+    public int Filtro { get; set; }
+    public List<Empleados>? Empleados { get; set; }
+    public Empleados? empleados { get; set; } = new Empleados();
+    public int Conteo { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Buscar();
+    }
+
+    public async Task Buscar()
+    {
+        if (Filtro == 0)
+        {
+            Empleados = await httpClient.GetFromJsonAsync<List<Empleados>>($"api/Empleados");
+        }
+        else
+        {
+            var listaClientes = await httpClient.GetFromJsonAsync<List<Empleados>>($"api/Empleados/");
+            Empleados = listaClientes?.Where(c => c.EmpleadoId == Filtro).ToList();
+        }
+        Conteo = Empleados != null ? Empleados!.Count() : 0;
+        StateHasChanged();
+    }
+
+}
