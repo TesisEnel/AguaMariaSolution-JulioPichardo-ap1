@@ -70,6 +70,8 @@ namespace AguaMariaSolution.Server.DAL
             new EntidadesMuestreoAgua() {EntidadesMuestreoAguaId = 6, Descripción = "Ablandadores"},
             new EntidadesMuestreoAgua() {EntidadesMuestreoAguaId = 7, Descripción = "Ósmosis"},});
         }
+
+        public DbSet<EntidadesMuestreoAgua> EntidadesMuestreoAgua { get; set; } = default!;
     }
 }
 
