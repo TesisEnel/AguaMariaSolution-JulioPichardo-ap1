@@ -22,5 +22,4 @@ namespace AguaMariaSolution.Server.DAL
         }
     }
 }
-}
 
