@@ -50,13 +50,22 @@
                         <option value="" hidden="hidden">Seleccione</option>
                         @foreach (var p in ListaParametros)
                         {
-                            if (p.ParametroId == 1)
+                            if (p.ParametroId >= 1 && p.ParametroId <= 14)
                             {
                                 <option value="@p.ParametroId">@p.Descripción</option>
                             }
-                        } 
+                            if (p.ParametroId == 15)
+                                break;
+                        }
                     </InputSelect>
                     <ValidationMessage For="@(() => Detalles.ParametroId)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Valor</label>
+                    <div class="input-group">
+                        <InputNumber @bind-Value="Detalles.Valor" class="form-control"></InputNumber>
+                        <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="oi oi-plus" />Add </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -79,6 +88,10 @@
                     <tr>
                         <td>@detalle.ParametroId</td>
                         <td>@ObtenerDescripción(detalle.ParametroId)</td>
+                        <td>@ObtenerMínimo(detalle.ParametroId)</td>
+                        <td>@ObtenerMáximo(detalle.ParametroId)</td>
+                        <td>@detalle.Valor</td>
+                        <td>@detalle.Pasó</td>
                         <td><button type="button" class="btn btn-danger oi oi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
                     </tr>
                 }
@@ -162,6 +175,35 @@
         }
     }
 
+    public bool ValidarGuardar()
+    {
+        if (productosTerminados.ProductoTerminadosDetalle.Count == 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se puede guardar un registro sin detalles.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        if (productosTerminados.ProductoTerminadosDetalle.GroupBy(d => d.ParametroId).Any(group => group.Count() > 1))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se puede guardar un registro con más de un mismo parametro.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        return true;
+    }
+
     public async Task Guardar()
     {
         using var response = await httpClient.PostAsJsonAsync("api/ControlCalidadProductoTerminado", productosTerminados);
@@ -231,14 +273,39 @@
         Nuevo();
     }
 
-    public bool Validar()
+    public bool ValidarDetalle()
     {
+        if (Detalles.ParametroId == 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Debe seleccionar un parámetro.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+
+        if (Detalles.Valor < 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Debe ingresar un valor.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
         return false;
     }
 
     public async Task AgregarDetalle()
     {
-        if (Validar())
+        if (ValidarDetalle())
         {
             var mensaje = new NotificationMessage
                 {
@@ -276,11 +343,30 @@
         StateHasChanged();
     }
 
+    public bool ValidarSiPasoDetalle()
+    {
+        var Mínimo = ListaParametros.Where(p => p.ParametroId == Detalles.ParametroId).FirstOrDefault()!.Mínimo;
+        var Máximo = ListaParametros.Where(p => p.ParametroId == Detalles.ParametroId).FirstOrDefault()!.Máximo;
+        if (Detalles.Valor >= Mínimo && Detalles.Valor <= Máximo)
+            return true;
+        return false;
+    }
+
     private async Task<Parametros> BuscarParametros(int ParametroId)
     {
         var producto = await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{ParametroId}");
 
         return producto ?? new Parametros();
+    }
+
+    public float ObtenerMínimo(int Id)
+    {
+        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Mínimo;
+    }
+
+    public float ObtenerMáximo(int Id)
+    {
+        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Máximo;
     }
 }
 
