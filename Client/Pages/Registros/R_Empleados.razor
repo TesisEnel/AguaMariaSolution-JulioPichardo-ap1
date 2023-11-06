@@ -7,7 +7,7 @@
     <DataAnnotationsValidator />
     <div class="card">
         <div class="card-header">
-            <h1>Registro Cliente</h1>
+            <h1>Registro de Empleados</h1>
         </div>
         <div class="card-body">
             <label>ID:</label>
@@ -94,7 +94,7 @@
                 {
                     Severity = NotificationSeverity.Error,
                     Summary = "Error",
-                    Detail = "No se encontro ningun cliente",
+                    Detail = "No se encontro ningun empleado",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
@@ -124,7 +124,7 @@
                 {
                     Severity = NotificationSeverity.Success,
                     Summary = "Validacion",
-                    Detail = "Cliente Guardado Correctamente",
+                    Detail = "Empleado Guardado Correctamente",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
@@ -160,7 +160,7 @@
                 {
                     Severity = NotificationSeverity.Success,
                     Summary = "Validacion",
-                    Detail = "Cliente Eliminado Correctamente",
+                    Detail = "Empleado Eliminado Correctamente",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);

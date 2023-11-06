@@ -109,8 +109,8 @@
 @code
 {
     [Parameter]
-
     public int ProductoTerminadoId { get; set; }
+
     public ControlCalidadProductoTerminado productosTerminados { get; set; } = new ControlCalidadProductoTerminado();
     public ProductoTerminadosDetalle Detalles { get; set; } = new ProductoTerminadosDetalle();
     public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
@@ -119,12 +119,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // var Parametros = await httpClient.GetFromJsonAsync<List<Parametros>>("api/Parametros");
+        var Parametros = await httpClient.GetFromJsonAsync<List<Parametros>>("api/Parametros");
 
-        // if (Parametros is not null)
-        // {
-        //     ListaParametros = Parametros;
-        // }
+        if (Parametros is not null)
+        {
+            ListaParametros = Parametros;
+        }
         if (ProductoTerminadoId > 0)
         {
             this.productosTerminados.ProductoTerminadoId = ProductoTerminadoId;
@@ -135,9 +135,9 @@
     private async Task<ControlCalidadProductoTerminado> BuscarEntrada(int ProductoTerminadoId)
     {
         ControlCalidadProductoTerminado ControlCalidadProductoTerminado = new ControlCalidadProductoTerminado();
-        var entradaEncontrada = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{ProductoTerminadoId}");
-        if (entradaEncontrada != null)
-            return ControlCalidadProductoTerminado = entradaEncontrada;
+        var productoTerminadoEncontrado = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{ProductoTerminadoId}");
+        if (productoTerminadoEncontrado != null)
+            return ControlCalidadProductoTerminado = productoTerminadoEncontrado;
         return new ControlCalidadProductoTerminado();
     }
 
@@ -149,15 +149,15 @@
     public async Task Buscar()
     {
         ListaDetalles = new List<ProductoTerminadosDetalle>();
-        var entradaIdEncontrada = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!
+        var productoTerminadoIdEncontrado = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!
         .ToList()
         .Any(e => e.ProductoTerminadoId == productosTerminados.ProductoTerminadoId);
-        if (entradaIdEncontrada)
+        if (productoTerminadoIdEncontrado)
         {
-            var entradaEncontrada = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{productosTerminados.ProductoTerminadoId}");
-            if (entradaEncontrada != null)
+            var productoTerminadoEncontrado = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{productosTerminados.ProductoTerminadoId}");
+            if (productoTerminadoEncontrado != null)
             {
-                this.productosTerminados = entradaEncontrada;
+                this.productosTerminados = productoTerminadoEncontrado;
                 StateHasChanged();
             }
         }
@@ -167,7 +167,7 @@
                 {
                     Severity = NotificationSeverity.Error,
                     Summary = "Error",
-                    Detail = "No se encontro ninguna entrada",
+                    Detail = "No se encontro ningun Control de Calidad",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
@@ -206,6 +206,10 @@
 
     public async Task Guardar()
     {
+        if (!ValidarGuardar())
+        {
+            return;
+        }
         using var response = await httpClient.PostAsJsonAsync("api/ControlCalidadProductoTerminado", productosTerminados);
         if (!response.IsSuccessStatusCode)
         {
@@ -226,7 +230,7 @@
                 {
                     Severity = NotificationSeverity.Success,
                     Summary = "Validacion",
-                    Detail = "Entrada Guardada Correctamente",
+                    Detail = "Control de Calidad Guardado Correctamente",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
@@ -253,7 +257,7 @@
                 {
                     Severity = NotificationSeverity.Error,
                     Summary = "Error",
-                    Detail = "La Entrada no fue Eliminada Correctamente",
+                    Detail = "El Control de Calidad no fue Eliminada Correctamente",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
@@ -265,7 +269,7 @@
                 {
                     Severity = NotificationSeverity.Success,
                     Summary = "Validacion",
-                    Detail = "Entrada Eliminada Correctamente",
+                    Detail = "Control de Calidad Eliminado Correctamente",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
@@ -323,6 +327,7 @@
             Detalles.ProductoTerminadoId = productosTerminados.ProductoTerminadoId;
             productosTerminados.ProductoTerminadosDetalle.Add(Detalles);
             ListaDetalles.Add(Detalles);
+            Detalles.Pasó = ValidarSiPasoDetalle();
             Detalles = new ProductoTerminadosDetalle();
 
         }
@@ -349,7 +354,8 @@
         var Máximo = ListaParametros.Where(p => p.ParametroId == Detalles.ParametroId).FirstOrDefault()!.Máximo;
         if (Detalles.Valor >= Mínimo && Detalles.Valor <= Máximo)
             return true;
-        return false;
+        else
+            return false;
     }
 
     private async Task<Parametros> BuscarParametros(int ParametroId)
