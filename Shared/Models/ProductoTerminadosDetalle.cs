@@ -10,7 +10,7 @@ namespace AguaMariaSolution.Shared.Models
     public class ProductoTerminadosDetalle
     {
         [Key]
-        public int ID { get; set; }
+        public int DetalleId { get; set; }
         
         public int ProductoTerminadoId {  get; set; }
 

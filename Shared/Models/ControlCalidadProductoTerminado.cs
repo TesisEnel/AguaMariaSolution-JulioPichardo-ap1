@@ -19,5 +19,8 @@ namespace AguaMariaSolution.Shared.Models
         public string? AcciónTomada { get; set; }
         public int EmpleadoId { get; set; }
         public int TandaId { get; set; }
+
+        [ForeignKey("ProductoTerminadoId")]
+        public ICollection<ProductoTerminadosDetalle> ProductoTerminadosDetalle { get; set; } = new List<ProductoTerminadosDetalle>();
     }
 }
