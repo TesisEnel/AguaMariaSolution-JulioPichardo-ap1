@@ -102,8 +102,20 @@
                     <div class="col-6">
                         <label>Valor:</label>
                         <div class="input-group">
-
-                            <InputNumber @bind-Value="Valor" class="form-control col-1"></InputNumber>
+                            @switch (ParametroSeleccionado)
+                            {
+                                case 33:
+                                    <InputSelect @bind-Value="Valor">
+                                        <option value="" hidden="hidden">Seleccione</option>
+                                        <option value="1">Inodoro</option>
+                                        <option value="0">Odoro</option>
+                                    </InputSelect>
+                                    break;
+                                default:
+                                    <InputNumber @bind-Value="Valor" class="form-control col-1"></InputNumber>
+                                    break;
+                            }
+                            
                             <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="oi oi-plus" />Add </button>
                             <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="oi oi-reload" /> </button>
                         </div>
@@ -155,15 +167,17 @@
 
 @code
 {
-        [Parameter]
+    [Parameter]
+    public int controlCalidadAguaId { get; set; }
 
-        public int controlCalidadAguaId { get; set; }
     public ControlCalidadAgua controlCalidadAgua { get; set; } = new ControlCalidadAgua();
+
     public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
     public List<EntidadesMuestreoAgua> ListaEntidades { get; set; } = new List<EntidadesMuestreoAgua>();
     public List<ControlCalidadAguaDetalle> DetallesRemovidos { get; set; } = new List<ControlCalidadAguaDetalle>();
+
     public int ParametroSeleccionado;
-    public float Valor = -0.1f;
+    public float Valor = -1f;
 
     protected override async Task OnInitializedAsync()
     {
@@ -354,7 +368,7 @@
             notificationService.Notify(mensaje);
             return false;
         }
-        return false;
+        return true;
     }
 
     public bool ValidarSiPasoDetalle()
@@ -409,16 +423,18 @@
             return;
         }
 
-        if (controlCalidadAgua.ControlCalidadAguaDetalle.Where(d => d.ParametroId == detalleDeshacer.ParametroId) != null){
+        if (controlCalidadAgua.ControlCalidadAguaDetalle.Any(d => d.ParametroId == detalleDeshacer.ParametroId))
+        {
             var mensaje = new NotificationMessage
                 {
                     Severity = NotificationSeverity.Warning,
                     Summary = "Cuidado",
-                    Detail = "Ya tienen agregado un detalle con este mismo parámetro, elimine uno antes de guardar.",
+                    Detail = "Ya tiene agregado un detalle con este mismo parámetro, elimine uno antes de guardar.",
                     Duration = 7000,
                 };
             notificationService.Notify(mensaje);
         }
+
 
         controlCalidadAgua.ControlCalidadAguaDetalle.Add(detalleDeshacer);
         DetallesRemovidos.Remove(detalleDeshacer);
@@ -434,7 +450,7 @@
 
     private async Task CargarEntidades()
     {
-        var encontrados = await httpClient.GetFromJsonAsync<List<EntidadesMuestreoAgua>>("api/EntidadesMuestreoAgua");
+        var encontrados = await httpClient.GetFromJsonAsync<List<EntidadesMuestreoAgua>>("api/EntidadesMuestreoAguas");
         if (encontrados != null)
             ListaEntidades = encontrados;
     }
