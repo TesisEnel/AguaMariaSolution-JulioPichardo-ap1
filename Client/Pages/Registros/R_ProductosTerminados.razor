@@ -63,8 +63,28 @@
                 <div class="col-md-6">
                     <label>Valor</label>
                     <div class="input-group">
-                        <InputNumber @bind-Value="Detalles.Valor" class="form-control"></InputNumber>
+                        @switch (Detalles.ParametroId)
+                        {
+                            case 12:
+                                <InputSelect @bind-Value="Detalles.Valor">
+                                    <option value="" hidden="hidden">Seleccione</option>
+                                    <option value="1">Insípido</option>
+                                    <option value="0">sápido</option>
+                                </InputSelect>
+                                break;
+                            case 14:
+                                <InputSelect @bind-Value="Detalles.Valor">
+                                    <option value="" hidden="hidden">Seleccione</option>
+                                    <option value="1">Sí</option>
+                                    <option value="0">No</option>
+                                </InputSelect>
+                                break;
+                            default:
+                                <InputNumber @bind-Value="Detalles.Valor" class="form-control col-1"></InputNumber>
+                                break;
+                        }
                         <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="oi oi-plus" />Add </button>
+                        <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="oi oi-reload" /> </button>
                     </div>
                 </div>
             </div>
@@ -289,7 +309,7 @@
                     Duration = 4000
                 };
             notificationService.Notify(mensaje);
-            return false;
+            return true;
         }
 
         if (Detalles.Valor < 0)
@@ -302,7 +322,7 @@
                     Duration = 4000
                 };
             notificationService.Notify(mensaje);
-            return false;
+            return true;
         }
         return false;
     }
@@ -345,6 +365,40 @@
             productosTerminados.ProductoTerminadosDetalle.Remove(detalle);
             DetallesRemovidos.Add(detalleEncontrado);
         }
+        StateHasChanged();
+    }
+
+    public void Deshacer()
+    {
+        var detalleDeshacer = DetallesRemovidos.FirstOrDefault();
+        if (detalleDeshacer is null)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "No hay detalles",
+                    Detail = "No tiene ningun detalle removido para deshacerlo.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
+        if (productosTerminados.ProductoTerminadosDetalle.Any(d => d.ParametroId == detalleDeshacer.ParametroId))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Cuidado",
+                    Detail = "Ya tiene agregado un detalle con este mismo parámetro, elimine uno antes de guardar.",
+                    Duration = 7000,
+                };
+            notificationService.Notify(mensaje);
+        }
+
+
+        productosTerminados.ProductoTerminadosDetalle.Add(detalleDeshacer);
+        DetallesRemovidos.Remove(detalleDeshacer);
         StateHasChanged();
     }
 
