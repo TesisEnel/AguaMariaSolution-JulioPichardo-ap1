@@ -1,0 +1,286 @@
+﻿@page "/RegistroProductoTerminado";
+@page "/RegistroProductoTerminado/{ProductoTerminadoId:int}";
+@inject HttpClient httpClient
+@inject NotificationService notificationService;
+
+<EditForm Model="productosTerminados" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header">
+            <h1>Registro Control Calidad Producto Terminado</h1>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <label>Producto Id:</label>
+                <div class="input-group col-md-6">
+                    <InputNumber @bind-Value="productosTerminados.ProductoTerminadoId" class="id-input"></InputNumber>
+                    <button type="button" class="btn btn-dark oi oi-magnifying-glass" @onclick="Buscar"></button>
+                </div>
+                <div class="col-md-6">
+                    <label>Fecha:</label>
+                    <InputDate @bind-Value="productosTerminados.Fecha" class="form-control"></InputDate>
+                    <ValidationMessage For="@(() => productosTerminados.Fecha)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Empleado:</label>
+                    <InputNumber @bind-Value="productosTerminados.EmpleadoId" class="form-control"></InputNumber>
+                    <ValidationMessage For="@(() => productosTerminados.EmpleadoId)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Acci&oacute;n Tomada:</label>
+                    <InputText @bind-Value="productosTerminados.AcciónTomada" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => productosTerminados.AcciónTomada)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Tanda:</label>
+                    <InputNumber @bind-Value="productosTerminados.TandaId" class="form-control"></InputNumber>
+                    <ValidationMessage For="@(() => productosTerminados.TandaId)" />
+                </div>
+            </div>
+        </div>
+        @*Detalles:*@
+        <div class="card card-header">
+            <h3>Detalles</h3>
+        </div>
+        <div class="card-body border border-1">
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Parametros</label>
+                    <InputSelect @bind-Value="Detalles.ParametroId" class="form-select">
+                        <option value="" hidden="hidden">Seleccione</option>
+                        @foreach (var p in ListaParametros)
+                        {
+                            if (p.ParametroId == 1)
+                            {
+                                <option value="@p.ParametroId">@p.Descripción</option>
+                            }
+                        } 
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Detalles.ParametroId)" />
+                </div>
+            </div>
+        </div>
+        <table class='table table-responsive table-striped'>
+            <thead>
+                <tr>
+                    <th>Parametro Id</th>
+                    <th>Descripci&oacute;n</th>
+                    <th>M&iacute;nimo</th>
+                    <th>M&aacute;ximo</th>
+                    <th>Valor</th>
+                    <th>Pas&oacute;</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detalle in productosTerminados.ProductoTerminadosDetalle)
+                {
+                    var entradaEncontrada = BuscarEntrada(detalle.ProductoTerminadoId);
+                    <tr>
+                        <td>@detalle.ParametroId</td>
+                        <td>@ObtenerDescripción(detalle.ParametroId)</td>
+                        <td><button type="button" class="btn btn-danger oi oi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="card-footer text-center">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+        </div>
+    </div>
+</EditForm>
+
+@code
+{
+    [Parameter]
+
+    public int ProductoTerminadoId { get; set; }
+    public ControlCalidadProductoTerminado productosTerminados { get; set; } = new ControlCalidadProductoTerminado();
+    public ProductoTerminadosDetalle Detalles { get; set; } = new ProductoTerminadosDetalle();
+    public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
+    public List<ProductoTerminadosDetalle> DetallesRemovidos { get; set; } = new List<ProductoTerminadosDetalle>();
+    public List<ProductoTerminadosDetalle> ListaDetalles { get; set; } = new List<ProductoTerminadosDetalle>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // var Parametros = await httpClient.GetFromJsonAsync<List<Parametros>>("api/Parametros");
+
+        // if (Parametros is not null)
+        // {
+        //     ListaParametros = Parametros;
+        // }
+        if (ProductoTerminadoId > 0)
+        {
+            this.productosTerminados.ProductoTerminadoId = ProductoTerminadoId;
+            await Buscar();
+        }
+    }
+
+    private async Task<ControlCalidadProductoTerminado> BuscarEntrada(int ProductoTerminadoId)
+    {
+        ControlCalidadProductoTerminado ControlCalidadProductoTerminado = new ControlCalidadProductoTerminado();
+        var entradaEncontrada = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{ProductoTerminadoId}");
+        if (entradaEncontrada != null)
+            return ControlCalidadProductoTerminado = entradaEncontrada;
+        return new ControlCalidadProductoTerminado();
+    }
+
+    public string ObtenerDescripción(int Id)
+    {
+        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Descripción!;
+    }
+
+    public async Task Buscar()
+    {
+        ListaDetalles = new List<ProductoTerminadosDetalle>();
+        var entradaIdEncontrada = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!
+        .ToList()
+        .Any(e => e.ProductoTerminadoId == productosTerminados.ProductoTerminadoId);
+        if (entradaIdEncontrada)
+        {
+            var entradaEncontrada = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{productosTerminados.ProductoTerminadoId}");
+            if (entradaEncontrada != null)
+            {
+                this.productosTerminados = entradaEncontrada;
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se encontro ninguna entrada",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+    }
+
+    public async Task Guardar()
+    {
+        using var response = await httpClient.PostAsJsonAsync("api/ControlCalidadProductoTerminado", productosTerminados);
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se pudo Guardar correctamente, verifique los campos",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        var entradaDevuelta = await response.Content.ReadFromJsonAsync<ControlCalidadProductoTerminado>();
+        if (entradaDevuelta is not null)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Entrada Guardada Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            productosTerminados = entradaDevuelta;
+            StateHasChanged();
+            this.Nuevo();
+        }
+    }
+
+    public void Nuevo()
+    {
+        this.productosTerminados = new ControlCalidadProductoTerminado();
+        this.Detalles = new ProductoTerminadosDetalle();
+        DetallesRemovidos = new List<ProductoTerminadosDetalle>();
+        ListaDetalles = new List<ProductoTerminadosDetalle>();
+    }
+
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/ControlCalidadProductoTerminado/{productosTerminados.ProductoTerminadoId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "La Entrada no fue Eliminada Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Entrada Eliminada Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+        }
+        Nuevo();
+    }
+
+    public bool Validar()
+    {
+        return false;
+    }
+
+    public async Task AgregarDetalle()
+    {
+        if (Validar())
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Llene los campos del detalle Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
+        if (productosTerminados != null)
+        {
+            Detalles.ProductoTerminadoId = productosTerminados.ProductoTerminadoId;
+            productosTerminados.ProductoTerminadosDetalle.Add(Detalles);
+            ListaDetalles.Add(Detalles);
+            Detalles = new ProductoTerminadosDetalle();
+
+        }
+        StateHasChanged();
+    }
+
+    public void RemoverDetalle(ProductoTerminadosDetalle detalle)
+    {
+        var detalleEncontrado = productosTerminados.ProductoTerminadosDetalle.FirstOrDefault(d => d.DetalleId == detalle.DetalleId);
+        if (detalleEncontrado != null)
+        {
+            var entrada = BuscarEntrada(detalleEncontrado.ProductoTerminadoId);
+            detalle = detalleEncontrado;
+            Detalles = detalleEncontrado;
+            productosTerminados.ProductoTerminadosDetalle.Remove(detalle);
+            DetallesRemovidos.Add(detalleEncontrado);
+        }
+        StateHasChanged();
+    }
+
+    private async Task<Parametros> BuscarParametros(int ParametroId)
+    {
+        var producto = await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{ParametroId}");
+
+        return producto ?? new Parametros();
+    }
+}
+
