@@ -27,6 +27,13 @@ namespace AguaMariaSolution.Shared.Models
         [Required(ErrorMessage = "Campo Obligatorio")]
         public string? Dirección { get; set; }
 
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "Ingrese el telefono correctamente, Ejemplo: 8094587412")]
+        [Required(ErrorMessage = "Campo Obligatorio")]
+        public string? Teléfono { get; set; }
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "Ingrese el Celular correctamente, Ejemplo: 8294587412")]
+        [Required(ErrorMessage = "Campo Obligatorio")]
+        public string? Celular { get; set; }
+
         [ForeignKey("EmpleadoId")]
         public ICollection<ControlCalidadProductoTerminado> ControlCalidadProductoTerminado { get; set; } = new List<ControlCalidadProductoTerminado>();
     }
