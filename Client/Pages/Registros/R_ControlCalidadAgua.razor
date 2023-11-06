@@ -65,14 +65,36 @@
                             @switch(controlCalidadAgua.EntidadMuestreoAguaId)
                             {
                                 case 1:
-                                    @foreach (var p in ListaParametros)
+                                case 2:
+                                case 3:
+                                case 4:
+                                    for(int i = 20; i <= 27; i++)
                                     {
-                                        if (p.ParametroId == 1 || p.ParametroId == 2 || p.ParametroId == 3 || p.ParametroId == 4 || p.ParametroId == 5 || p.ParametroId == 6 || p.ParametroId == 7 || p.ParametroId == 8 || p.ParametroId == 9 || p.ParametroId == 10 || p.ParametroId == 11 || p.ParametroId == 12 || p.ParametroId == 13 || p.ParametroId == 14 || p.ParametroId == 15 || p.ParametroId == 16 || p.ParametroId == 17 || p.ParametroId == 18 || p.ParametroId == 19 || p.ParametroId == 20 || p.ParametroId == 21 || p.ParametroId == 22 || p.ParametroId == 23 || p.ParametroId == 24 || p.ParametroId == 25 || p.ParametroId == 26 || p.ParametroId == 27 || p.ParametroId == 28 || p.ParametroId == 29 || p.ParametroId == 30 || p.ParametroId == 31 || p.ParametroId == 32 || p.ParametroId == 33 || p.ParametroId == 34 || p.ParametroId == 35 || p.ParametroId == 36 || p.ParametroId == 37 || p.ParametroId == 38 || p.ParametroId == 39 || p.ParametroId == 40 || p.ParametroId == 41 || p.ParametroId == 42 || p.ParametroId == 43 || p.ParametroId == 44 || p.ParametroId == 45 || p.ParametroId == 46 || p.ParametroId == 47 || p.ParametroId == 48 || p.ParametroId == 49 || p.ParametroId == 50 || p.ParametroId == 51 || p.ParametroId == 52 || p.ParametroId == 53 || p.ParametroId == 54 || p.ParametroId == 55 || p.ParametroId == 56 || p.ParametroId == 57 || p.ParametroId == 58 || p.ParametroId == 59 || p.ParametroId == 60)
-                                        {
+                                            var p = ListaParametros.Where(p => p.ParametroId == i).FirstOrDefault();
                                             <option value="@p.ParametroId">@p.Descripción</option>
-                                        }
                                     }
-                                break;
+                                    break;
+                                case 5:
+                                    for (int i = 30; i <= 33; i++)
+                                    {
+                                        var p = ListaParametros.Where(p => p.ParametroId == i).FirstOrDefault();
+                                        <option value="@p.ParametroId">@p.Descripción</option>
+                                    }
+                                    break;
+                                case 6:
+                                    for (int i = 40; i <= 42; i++)
+                                    {
+                                        var p = ListaParametros.Where(p => p.ParametroId == i).FirstOrDefault();
+                                        <option value="@p.ParametroId">@p.Descripción</option>
+                                    }
+                                    break;
+                                case 7:
+                                    for (int i = 50; i <= 51; i++)
+                                    {
+                                        var p = ListaParametros.Where(p => p.ParametroId == i).FirstOrDefault();
+                                        <option value="@p.ParametroId">@p.Descripción</option>
+                                    }
+                                    break;
                             }
                         }
                         </InputSelect>
@@ -80,6 +102,7 @@
                     <div class="col-6">
                         <label>Valor:</label>
                         <div class="input-group">
+
                             <InputNumber @bind-Value="Valor" class="form-control col-1"></InputNumber>
                             <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="oi oi-plus" />Add </button>
                             <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="oi oi-reload" /> </button>
@@ -132,9 +155,9 @@
 
 @code
 {
-    [Parameter]
+        [Parameter]
 
-    public int controlCalidadAguaId { get; set; }
+        public int controlCalidadAguaId { get; set; }
     public ControlCalidadAgua controlCalidadAgua { get; set; } = new ControlCalidadAgua();
     public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
     public List<EntidadesMuestreoAgua> ListaEntidades { get; set; } = new List<EntidadesMuestreoAgua>();
@@ -338,7 +361,7 @@
     {
         var Mínimo = ListaParametros.Where(p => p.ParametroId == ParametroSeleccionado).FirstOrDefault()!.Mínimo;
         var Máximo = ListaParametros.Where(p => p.ParametroId == ParametroSeleccionado).FirstOrDefault()!.Máximo;
-        if (Valor > Mínimo && Valor < Máximo)
+        if (Valor >= Mínimo && Valor <= Máximo)
             return true;
         return false;
     }
@@ -415,5 +438,7 @@
         if (encontrados != null)
             ListaEntidades = encontrados;
     }
+
+   
 }
 
