@@ -16,9 +16,9 @@ namespace AguaMariaSolution.Shared.Models
         public string? Descripción { get; set; }
 
         [Required(ErrorMessage = "Debe introducir el mínimo")]
-        public int Mínimo { get; set; }
+        public float Mínimo { get; set; }
 
         [Required(ErrorMessage = "Debe introducir el máximo")]
-        public int Máximo { get; set; }
+        public float Máximo { get; set; }
     }
 }

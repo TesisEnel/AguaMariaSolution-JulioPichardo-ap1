@@ -16,6 +16,8 @@ namespace AguaMariaSolution.Shared.Models
 
         public int EmpleadoId { get; set; }
 
+        public int EntidadMuestreoAguaId { get; set; }
+
         public int TandaId { get; set; }
 
         [ForeignKey("ControlCalidadAguaId")]
