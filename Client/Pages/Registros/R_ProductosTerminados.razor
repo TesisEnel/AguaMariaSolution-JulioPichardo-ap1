@@ -246,6 +246,13 @@
         var entradaDevuelta = await response.Content.ReadFromJsonAsync<ControlCalidadProductoTerminado>();
         if (entradaDevuelta is not null)
         {
+            if (DetallesRemovidos.Count > 0)
+            {
+                foreach (var detalle in DetallesRemovidos)
+                {
+                    await httpClient.DeleteAsync($"api/ControlCalidadProductoTerminado/DeleteDetalles/{detalle.DetalleId}");
+                }
+            }
             var mensaje = new NotificationMessage
                 {
                     Severity = NotificationSeverity.Success,
@@ -347,6 +354,8 @@
             Detalles.ProductoTerminadoId = productosTerminados.ProductoTerminadoId;
             productosTerminados.ProductoTerminadosDetalle.Add(Detalles);
             ListaDetalles.Add(Detalles);
+            if (DetallesRemovidos.Any(d => d.DetalleId == Detalles.DetalleId))
+                DetallesRemovidos.Remove(Detalles);
             Detalles.Pasó = ValidarSiPasoDetalle();
             Detalles = new ProductoTerminadosDetalle();
 
@@ -356,15 +365,11 @@
 
     public void RemoverDetalle(ProductoTerminadosDetalle detalle)
     {
-        var detalleEncontrado = productosTerminados.ProductoTerminadosDetalle.FirstOrDefault(d => d.DetalleId == detalle.DetalleId);
-        if (detalleEncontrado != null)
-        {
-            var entrada = BuscarEntrada(detalleEncontrado.ProductoTerminadoId);
-            detalle = detalleEncontrado;
-            Detalles = detalleEncontrado;
-            productosTerminados.ProductoTerminadosDetalle.Remove(detalle);
-            DetallesRemovidos.Add(detalleEncontrado);
-        }
+        Detalles = detalle;
+        productosTerminados.ProductoTerminadosDetalle.Remove(detalle);
+        DetallesRemovidos.Add(detalle);
+        if (ListaDetalles.Any(d => d.DetalleId == detalle.DetalleId))
+            ListaDetalles.Remove(detalle);
         StateHasChanged();
     }
 
