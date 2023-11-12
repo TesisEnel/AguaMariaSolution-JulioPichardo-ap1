@@ -117,6 +117,23 @@ namespace AguaMariaSolution.Server.Controllers
             return NoContent();
         }
 
+        [HttpDelete("DeleteDetalles/{id}")]
+        public async Task<IActionResult> DeleteDetalles(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
+            var productosT = await _context.ProductoTerminadosDetalle.FirstOrDefaultAsync(pt => pt.DetalleId == id);
+            if (productosT is null)
+            {
+                return NotFound();
+            }
+            _context.ProductoTerminadosDetalle.Remove(productosT);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
         private bool ControlCalidadProductoTerminadoExists(int id)
         {
             return (_context.ControlCalidadProductoTerminado?.Any(e => e.ProductoTerminadoId == id)).GetValueOrDefault();
