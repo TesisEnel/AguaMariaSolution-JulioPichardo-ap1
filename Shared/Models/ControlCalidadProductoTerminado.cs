@@ -18,7 +18,6 @@ namespace AguaMariaSolution.Shared.Models
         [StringLength(500,ErrorMessage = "No puede exceder los 500 caracteres")]
         public string? AcciónTomada { get; set; }
         public int EmpleadoId { get; set; }
-        public int TandaId { get; set; }
 
         [ForeignKey("ProductoTerminadoId")]
         public ICollection<ProductoTerminadosDetalle> ProductoTerminadosDetalle { get; set; } = new List<ProductoTerminadosDetalle>();
