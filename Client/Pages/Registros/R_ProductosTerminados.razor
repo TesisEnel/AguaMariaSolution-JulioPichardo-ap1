@@ -26,11 +26,7 @@
                     <InputNumber @bind-Value="productosTerminados.EmpleadoId" class="form-control"></InputNumber>
                     <ValidationMessage For="@(() => productosTerminados.EmpleadoId)" />
                 </div>
-                <div class="col-md-6">
-                    <label>Acci&oacute;n Tomada:</label>
-                    <InputText @bind-Value="productosTerminados.AcciónTomada" class="form-control"></InputText>
-                    <ValidationMessage For="@(() => productosTerminados.AcciónTomada)" />
-                </div>
+               
             </div>
         </div>
         @*Detalles:*@
@@ -82,6 +78,20 @@
                         <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="oi oi-reload" /> </button>
                     </div>
                 </div>
+                @if (Detalles.ParametroId != 0)
+                {
+                    <div class="row">
+                        <div class="col-1">
+                            <label>M&iacute;nimo:</label>
+                            <h6>@ObtenerMínimo(Detalles.ParametroId)</h6>
+                        </div>
+
+                        <div class="col-1">
+                            <label>M&aacute;ximo:</label>
+                            <h6>@ObtenerMáximo(Detalles.ParametroId)</h6>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
         <table class='table table-responsive table-striped'>
@@ -112,6 +122,14 @@
                 }
             </tbody>
         </table>
+
+        <br />
+        <hr />
+        <div class="form-group col-10" style="margin: 5px;">
+            <label>Acci&oacute;n Tomada:</label>
+            <textarea @bind="productosTerminados.AcciónTomada" class="form-control" rows="3"></textarea>
+            <ValidationMessage For="@(() => productosTerminados.AcciónTomada)" />
+        </div>
 
         <div class="card-footer text-center">
             <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>

@@ -34,8 +34,11 @@
 
                 <div class="col-md-6">
                     <label>Tanda:</label>
-                    <InputNumber @bind-Value="controlCalidadAgua.TandaId" class="form-control"></InputNumber>
-                    <ValidationMessage For="@(() => controlCalidadAgua.TandaId)" />
+                    <InputSelect @bind-Value="controlCalidadAgua.TandaId" class="form-select" @onchange="nuevoDetalle">
+                        <option value="" disabled selected>Seleccione</option>
+                        <option value="1">Mañana</option>
+                        <option value="2">Tarde</option>
+                    </InputSelect>
                 </div>
 
                 <div class="row">
@@ -58,7 +61,7 @@
             <h3 class="text-center">Parametros</h3>
             <div class="card-body border border-1">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label>Parametros</label>
                         <InputSelect @bind-Value="ParametroSeleccionado" class="form-select">
                             <option value="" hidden="hidden">Seleccione</option>
@@ -70,8 +73,8 @@
                                 case 4:
                                     for(int i = 20; i <= 27; i++)
                                     {
-                                            var p = ListaParametros.Where(p => p.ParametroId == i).FirstOrDefault();
-                                            <option value="@p.ParametroId">@p.Descripción</option>
+                                        var p = ListaParametros.Where(p => p.ParametroId == i).FirstOrDefault();
+                                        <option value="@p.ParametroId">@p.Descripción</option>
                                     }
                                     break;
                                 case 5:
@@ -97,6 +100,9 @@
                                     break;
                             }
                         }
+
+                        
+
                         </InputSelect>
                     </div>
                     <div class="col-6">
@@ -121,6 +127,21 @@
                         </div>
                     </div>
                 </div>
+
+                @if (ParametroSeleccionado != 0)
+                {
+                    <div class="row">
+                    <div class="col-1">
+                        <label>M&iacute;nimo:</label>
+                        <h6>@ObtenerMínimo(ParametroSeleccionado)</h6>
+                    </div>
+
+                    <div class="col-1">
+                        <label>M&aacute;ximo:</label>
+                        <h6>@ObtenerMáximo(ParametroSeleccionado)</h6>
+                    </div>
+                    </div>
+                }
             </div>
             <table class='table table-responsive table-striped'>
                 <thead>
@@ -140,8 +161,8 @@
                         <tr>
                             <td>@detalle.ParametroId</td>
                             <td>@ObtenerDescripciónParámetro(detalle.ParametroId)</td>
-                            <td>@obtenerMínimo(detalle.ParametroId)</td>
-                            <td>@obtenerMáximo(detalle.ParametroId)</td>
+                            <td>@ObtenerMínimo(detalle.ParametroId)</td>
+                            <td>@ObtenerMáximo(detalle.ParametroId)</td>
                             <td>@detalle.Valor</td>
                             <td>@detalle.Pasó</td>
                             <td><button type="button" class="btn btn-danger oi oi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
@@ -150,12 +171,16 @@
                 </tbody>
             </table>
         </fieldset>
-
-        <div class="col-md-6">
+        
+        <br />
+        <hr />
+        <div class="form-group col-10" style="margin: 5px;">
             <label>Acci&oacute;n Tomada:</label>
-            <InputText @bind-Value="controlCalidadAgua.AcciónTomada" class="form-control"></InputText>
+            <textarea @bind="controlCalidadAgua.AcciónTomada" class="form-control" rows="3" ></textarea>
             <ValidationMessage For="@(() => controlCalidadAgua.AcciónTomada)" />
         </div>
+
+
 
         <div class="card-footer text-center">
             <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
@@ -213,12 +238,12 @@
         return ListaEntidades.Where(p => p.EntidadesMuestreoAguaId == Id).FirstOrDefault()!.Descripción!;
     }
 
-    public float obtenerMínimo(int Id)
+    public float ObtenerMínimo(int Id)
     {
         return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Mínimo;
     }
 
-    public float obtenerMáximo(int Id)
+    public float ObtenerMáximo(int Id)
     {
         return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Máximo;
     }
@@ -304,6 +329,18 @@
                     Severity = NotificationSeverity.Error,
                     Summary = "Error",
                     Detail = "No se puede guardar un registro con más de un mismo parametro.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        if (controlCalidadAgua.TandaId != 1 || controlCalidadAgua.TandaId != 2)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Debe seleccionar una tanda.",
                     Duration = 4000
                 };
             notificationService.Notify(mensaje);
