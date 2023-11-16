@@ -408,12 +408,36 @@
         return true;
     }
 
+    public void NotificarCuidadoParametros()
+    {
+        var mensaje = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Cuidado",
+                Detail = "El valor del parametro que ha ingresado esta fuera de los parametros",
+                Duration = 4000
+            };
+        notificationService.Notify(mensaje);
+    }
+
     public bool ValidarSiPasoDetalle()
     {
         var Mínimo = ListaParametros.Where(p => p.ParametroId == ParametroSeleccionado).FirstOrDefault()!.Mínimo;
         var Máximo = ListaParametros.Where(p => p.ParametroId == ParametroSeleccionado).FirstOrDefault()!.Máximo;
-        if (Valor >= Mínimo && Valor <= Máximo)
+        if (ParametroSeleccionado==33 && Valor == 1)
+        {
             return true;
+        }
+        else if (ParametroSeleccionado == 33 && Valor == 0)
+        {
+            return false;
+        }
+        else
+        if (Valor >= Mínimo && Valor <= Máximo)
+        {
+            NotificarCuidadoParametros();
+            return true;
+        }
         return false;
     }
 
@@ -423,12 +447,13 @@
         {
 
             var detalle = new ControlCalidadAguaDetalle
-                {
-                    ControlCalidadAguaId = controlCalidadAgua.ControlCalidadAguaId,
-                    ParametroId = ParametroSeleccionado,
-                    Valor = this.Valor,
-                    Pasó = ValidarSiPasoDetalle()
-                };
+            {
+                ControlCalidadAguaId = controlCalidadAgua.ControlCalidadAguaId,
+                ParametroId = ParametroSeleccionado,
+                Valor = this.Valor,
+                Pasó = ValidarSiPasoDetalle()
+            };
+
             controlCalidadAgua.ControlCalidadAguaDetalle.Add(detalle);
             Valor = 0;
             ParametroSeleccionado = 0;
@@ -436,12 +461,13 @@
         }
     }
 
-    public void RemoverDetalle(ControlCalidadAguaDetalle detalleRemover)
+    public async Task RemoverDetalle(ControlCalidadAguaDetalle detalleRemover)
     {
         ParametroSeleccionado = detalleRemover.ParametroId;
         Valor = detalleRemover.Valor;
         controlCalidadAgua.ControlCalidadAguaDetalle.Remove(detalleRemover);
         DetallesRemovidos.Add(detalleRemover);
+        await httpClient.DeleteAsync($"api/ControlCalidadAgua/DeleteAguaDetalle/{detalleRemover.ControlCalidadAguaDetalleId}");
         StateHasChanged();
     }
 
