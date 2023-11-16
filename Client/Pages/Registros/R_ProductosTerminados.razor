@@ -362,7 +362,18 @@
             notificationService.Notify(mensaje);
             return;
         }
-
+        if(productosTerminados.ProductoTerminadosDetalle.Any(d => d.ParametroId == Detalles.ParametroId))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Ya tiene agregado un detalle con este mismo parámetro, elimine uno antes de guardar.",
+                    Duration = 7000,
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
         if (productosTerminados != null)
         {
             Detalles.ProductoTerminadoId = productosTerminados.ProductoTerminadoId;
