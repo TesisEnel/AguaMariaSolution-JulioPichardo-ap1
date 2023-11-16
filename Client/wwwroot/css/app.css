@@ -1,5 +1,10 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+.img-logo {
+    height: 100px;
+    width: 100px;
+}
+
 .id-input {
     width: 150px;
     border: 1px solid #ced4da;

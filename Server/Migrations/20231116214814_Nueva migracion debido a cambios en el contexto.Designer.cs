@@ -3,6 +3,7 @@ using System;
 using AguaMariaSolution.Server.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AguaMariaSolution.Server.Migrations
 {
     [DbContext(typeof(Contexto))]
-    partial class ContextoModelSnapshot : ModelSnapshot
+    [Migration("20231116214814_Nueva migracion debido a cambios en el contexto")]
+    partial class Nuevamigraciondebidoacambiosenelcontexto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.13");
@@ -212,7 +215,7 @@ namespace AguaMariaSolution.Server.Migrations
                             ParametroId = 2,
                             Descripción = "Cloro Residual",
                             Máximo = 0f,
-                            Mínimo = 0f
+                            Mínimo = -3.4028235E+38f
                         },
                         new
                         {
@@ -225,8 +228,8 @@ namespace AguaMariaSolution.Server.Migrations
                         {
                             ParametroId = 4,
                             Descripción = "Conductancia",
-                            Máximo = 700f,
-                            Mínimo = 0f
+                            Máximo = 3.4028235E+38f,
+                            Mínimo = -3.4028235E+38f
                         },
                         new
                         {
@@ -261,21 +264,21 @@ namespace AguaMariaSolution.Server.Migrations
                             ParametroId = 9,
                             Descripción = "Hierro",
                             Máximo = 0.3f,
-                            Mínimo = 0f
+                            Mínimo = -3.4028235E+38f
                         },
                         new
                         {
                             ParametroId = 10,
                             Descripción = "Color",
                             Máximo = 5f,
-                            Mínimo = 0f
+                            Mínimo = -3.4028235E+38f
                         },
                         new
                         {
                             ParametroId = 11,
                             Descripción = "Turbidez",
                             Máximo = 0.5f,
-                            Mínimo = 0f
+                            Mínimo = -3.4028235E+38f
                         },
                         new
                         {

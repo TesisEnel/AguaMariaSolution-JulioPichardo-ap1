@@ -20,19 +20,19 @@ namespace AguaMariaSolution.Server.DAL
             {
                 //ControlCalidadProductoTerminado
             new Parametros() {ParametroId = 1, Descripción = "Cloruro", Mínimo = 0, Máximo = 250},
-            new Parametros() {ParametroId = 2, Descripción = "Cloro Residual", Mínimo = float.MinValue, Máximo = 0},
+            new Parametros() {ParametroId = 2, Descripción = "Cloro Residual", Mínimo = 0, Máximo = 0},
             new Parametros() {ParametroId = 3, Descripción = "STD", Mínimo = 0, Máximo = 500},
-            new Parametros() {ParametroId = 4, Descripción = "Conductancia", Mínimo = float.MinValue, Máximo = float.MaxValue},
+            new Parametros() {ParametroId = 4, Descripción = "Conductancia", Mínimo = 0, Máximo = 700},
             new Parametros() {ParametroId = 5, Descripción = "Dureza", Mínimo = 0, Máximo = 500},
             new Parametros() {ParametroId = 6, Descripción = "PH", Mínimo = 6.5f, Máximo = 8.5f},
             new Parametros() {ParametroId = 7, Descripción = "Sulfato", Mínimo = 0, Máximo = 250},
             new Parametros() {ParametroId = 8, Descripción = "Nitrato", Mínimo = 0, Máximo = 10},
-            new Parametros() {ParametroId = 9, Descripción = "Hierro", Mínimo = float.MinValue, Máximo = 0.3f},
-            new Parametros() {ParametroId = 10, Descripción = "Color", Mínimo = float.MinValue, Máximo = 5},
-            new Parametros() {ParametroId = 11, Descripción = "Turbidez", Mínimo = float.MinValue, Máximo = 0.5f},
-            new Parametros() {ParametroId = 12, Descripción = "Sabor", Mínimo = 0, Máximo = 1},
+            new Parametros() {ParametroId = 9, Descripción = "Hierro", Mínimo = 0, Máximo = 0.3f},
+            new Parametros() {ParametroId = 10, Descripción = "Color", Mínimo = 0, Máximo = 5},
+            new Parametros() {ParametroId = 11, Descripción = "Turbidez", Mínimo = 0, Máximo = 0.5f},
+            new Parametros() {ParametroId = 12, Descripción = "Sabor", Mínimo = 1, Máximo = 1},
             new Parametros() {ParametroId = 13, Descripción = "Ozono", Mínimo = 0.05f, Máximo = 0.1f},
-            new Parametros() {ParametroId = 14, Descripción = "Lamp UV", Mínimo = 0, Máximo = 1},
+            new Parametros() {ParametroId = 14, Descripción = "Lamp UV", Mínimo = 1, Máximo = 1},
 
                 //Entidades de Cisternar e INAPA - Registro Control Calidad Del Proceso Del Agua 
             new Parametros() {ParametroId = 20, Descripción = "Cloro Residual", Mínimo = 1, Máximo = 1.5f},
