@@ -6,14 +6,15 @@
 <EditForm Model="empleados" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="card">
-        <div class="card-header">
-            <h1>Registro de Empleados</h1>
+        <div class="card-header d-flex align-items-center">
+            <img src="AguaMariaLogo.png" class="img-logo" />
+            <h1>Registro de Empleados</h1>          
         </div>
         <div class="card-body">
             <label>ID:</label>
             <div class="input-group">
                 <InputNumber @bind-Value="empleados.EmpleadoId" class="id-input"></InputNumber>
-                <button type="button" class="btn btn-dark oi oi-magnifying-glass" @onclick="Buscar"></button>
+                <button type="button" class="btn btn-outline-primary oi oi-magnifying-glass" @onclick="Buscar"></button>
             </div>
             <div class="row">
                 <div class="col-md-6">
