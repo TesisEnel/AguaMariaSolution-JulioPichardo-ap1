@@ -1,0 +1,231 @@
+﻿@page "/Consultar/ControlCalidadAgua"
+
+@inject HttpClient httpClient
+@inject NotificationService notificationService
+
+<PageTitle>Consulta Control Calidad Del Proceso Del Agua</PageTitle>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center">
+        <img src="AguaMariaLogo.png" class="img-logo" />
+        <h1>Registro Control Calidad Del Proceso Del Agua</h1>
+    </div>
+    <div class="card-body">
+        <div class="input-group-text">
+
+            <label class="form-control-label col-1">Desde:</label>
+            <div class="col-3">
+                <input class="form-control" type="date" @bind="Desde" />
+            </div>
+
+            <label class="form-control-label col-1">Hasta:</label>
+            <div class="col-3">
+                <input class="form-control" type="date" @bind="Hasta" />
+            </div>
+
+            <div class="col-5">
+                <button type="button" @onclick="Buscar" class="btn btn-primary  ">
+                    <i class="oi oi-reload" />
+                    <br /> Buscar
+                </button>
+            </div>
+
+        </div>
+
+        <br />
+        <div class="row">
+            <div class="col-3">
+                <label class="form-control-label">Filtrar Por</label>
+                <InputSelect @bind-Value="FiltrarPor" class="form-select">
+                    <option value="-2" disabled selected> [Seleccione] </option>
+                    <option value="-1">Solo por fecha</option>
+                    <option value="0">Id</option>
+                    <option value="1">Acci&oacute;n Tomada</option>
+                    <option value="2">EmpleadoId</option>
+                    <option value="3">Entidad Muestreo Agua Id</option>
+                    <option value="4">TandaId</option>
+                </InputSelect>
+            </div>
+            <div class="col-3">
+                @if (FiltrarPor == -1)
+                {
+
+                }
+                else
+                {
+                    if (FiltrarPor == 0 || ControlCalidadAguaId > 0)
+                    {
+                        <label class="form-control-label">Id</label>
+                        <InputNumber @bind-Value="ControlCalidadAguaId" class="form-control"></InputNumber>
+                    }
+                    if (FiltrarPor == 1 || !string.IsNullOrEmpty(AcciónTomada))
+                    {
+                        <label class="form-control-label">Acci&oacute;n Tomada</label>
+                        <InputText @bind-Value="AcciónTomada" class="form-control"></InputText>
+                    }
+                    if (FiltrarPor == 2 || TandaId != 0)
+                    {
+                        <label class="form-control-label">Tanda</label>
+                        <InputSelect @bind-Value="TandaId" class="form-select">
+                            <option value="0">Quitar</option>
+                            <option value="" hidden selected>Seleccione</option>
+                            <option value="1">Mañana</option>
+                            <option value="2">Tarde</option>
+                        </InputSelect>
+                    }
+                    if (FiltrarPor == 3 || EmpleadoId > 0)
+                    {
+                        <label class="form-control-label">Empleado Id</label>
+                        <InputNumber @bind-Value="EmpleadoId" class="form-control"></InputNumber>
+                    }
+                    if (FiltrarPor == 4 || EntidadMuestreoAguaId > 0)
+                    {
+                        <label class="form-control-label">Entidad Muestreo Agua Id</label>
+                        <InputNumber @bind-Value="EntidadMuestreoAguaId" class="form-control"></InputNumber>
+                    }
+                }
+            </div>
+        </div>
+
+        @if (CCAgua is not null)
+        {
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Control Calidad Agua Id</th>
+                        <th>Fecha</th>
+                        <th>Acci&oacute;n Tomada</th>
+                        <th>Tanda Id</th>
+                        <th>Empleado Id</th>
+                        <th>Entidad Muestreo Agua Id</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cCAguas in CCAgua)
+                    {
+                        <tr>
+                            <td>@cCAguas.ControlCalidadAguaId</td>
+                            <td>@cCAguas.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@cCAguas.AcciónTomada</td>
+                            <td>@cCAguas.TandaId</td>
+                            <td>@cCAguas.EmpleadoId</td>
+                            <td>@cCAguas.EntidadMuestreoAguaId</td>
+                            <td><a href="Registrar/Entradas/@cCAguas.ControlCalidadAguaId">Ver</a></td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>Conteo = @Conteo</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+        }
+    </div>
+    <div class="card-footer">
+        <div class="form-row justify-content-sm-between" aria-orientation="vertical">
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<ControlCalidadAgua> CCAgua = new List<ControlCalidadAgua>();
+
+    public int FiltrarPor = -2;
+    public int Conteo = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Desde = DateTime.Now.AddMonths(-1);
+        Hasta = DateTime.Now;
+        await Buscar();
+        PrimeraEntrada = false;
+        NotificarBusquedaMultiFiltro();
+    }
+
+    public int ControlCalidadAguaId { get; set; }
+    public string? AcciónTomada { get; set; }
+    public int TandaId { get; set; }
+    public int EmpleadoId { get; set; }
+    public int EntidadMuestreoAguaId { get; set; }
+
+    bool PrimeraEntrada = true;
+
+    public DateTime Desde { get; set; }
+    public DateTime Hasta { get; set; }
+
+    public async Task Buscar()
+    {
+        Hasta = new DateTime(Hasta.Year, Hasta.Month, Hasta.Day, 23, 59, 59);
+        CCAgua = await httpClient.GetFromJsonAsync<List<ControlCalidadAgua>>($"api/ControlCalidadAguas");
+        Conteo = CCAgua != null ? CCAgua!.Count() : 0;
+
+        if (CCAgua.Count() == 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No tiene registros guardados.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
+        if (PrimeraEntrada)
+        {
+            return;
+        }
+
+        if (FiltrarPor == -1)
+        {
+            CCAgua = CCAgua.Where(x => x.Fecha >= Desde && x.Fecha <= Hasta).ToList();
+        }
+        else
+        {
+            CCAgua = CCAgua.Where(x => x.Fecha >= Desde && x.Fecha <= Hasta &&
+                                     (ControlCalidadAguaId == 0 || x.ControlCalidadAguaId == ControlCalidadAguaId) &&
+                                     (EntidadMuestreoAguaId == 0 || x.EntidadMuestreoAguaId == EntidadMuestreoAguaId) &&
+                                     (string.IsNullOrEmpty(AcciónTomada) || (x.AcciónTomada != null && x.AcciónTomada.ToLower().Contains(AcciónTomada.ToLower()))) &&
+                                     (TandaId == 0 || x.TandaId == TandaId) &&
+                                     (EmpleadoId == 0 || x.EmpleadoId == EmpleadoId))
+                                     .ToList();
+
+        }
+
+        Conteo = CCAgua != null ? CCAgua!.Count() : 0;
+        if (CCAgua.Count() == 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "No se ha encontrado ningún registro",
+                    Detail = "Revise los parámetros utilizados.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+        }
+        StateHasChanged();
+    }
+
+    public async Task NotificarBusquedaMultiFiltro()
+    {
+        var mensaje = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Info,
+                Summary = "Uso de Multifiltro",
+                Detail = "Puede aplicar varios filtros simultáneamente. Seleccione un filtro, ingrese los datos, luego utilice otro filtro y repita el proceso. Verá cómo se acumulan. Para eliminarlos, simplemente ingrese un 0. En el caso de concepto elimine el texto.",
+                Duration = 25000
+            };
+        notificationService.Notify(mensaje);
+        await Task.CompletedTask;
+    }
+}
