@@ -1,51 +1,51 @@
-﻿@page "/RegistroEmpleado";
-@page "/RegistroEmpleado/{EmpleadoId:int}";
+﻿@page "/Reviews";
+@page "/Reviews/{ReviewId:int}";
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
 
-<EditForm Model="empleados" OnValidSubmit="Guardar">
+<EditForm Model="reviews" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="card">
         <div class="card-header d-flex align-items-center">
             <img src="AguaMariaLogo.png" class="img-logo" />
-            <h1>Registro de Empleados</h1>          
+            <h1>Reviews</h1>
         </div>
         <div class="card-body">
-            <label>ID:</label>
-            <div class="input-group">
-                <InputNumber @bind-Value="empleados.EmpleadoId" class="id-input"></InputNumber>
-                <button type="button" class="btn btn-outline-primary oi oi-magnifying-glass" @onclick="Buscar"></button>
-            </div>
             <div class="row">
                 <div class="col-md-6">
+                    <label>Cliente Id:</label>
+                    <InputNumber @bind-Value="reviews.ClienteId" class="form-control"></InputNumber>
+                    <ValidationMessage For="@(() => reviews.ClienteId)" />
+                </div>
+                <div class="col-md-6">
                     <label>Nombre:</label>
-                    <InputText @bind-Value="empleados.Nombre" class="form-control"></InputText>
-                    <ValidationMessage For="@(() => empleados.Nombre)" />
+                    <InputText @bind-Value="reviews.Nombre" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => reviews.Nombre)" />
                 </div>
                 <div class="col-md-6">
                     <label>Apellido:</label>
-                    <InputText @bind-Value="empleados.Apellido" class="form-control"></InputText>
-                    <ValidationMessage For="@(() => empleados.Apellido)" />
+                    <InputText @bind-Value="reviews.Apellido" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => reviews.Apellido)" />
                 </div>
                 <div class="col-md-6">
                     <label>Email:</label>
-                    <InputText type="email" @bind-Value="empleados.Email" class="form-control"></InputText>
-                    <ValidationMessage For="@(() => empleados.Email)" />
+                    <InputText type="email" @bind-Value="reviews.Email" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => reviews.Email)" />
                 </div>
                 <div class="col-md-6">
-                    <label>Dirección:</label>
-                    <InputText @bind-Value="empleados.Dirección" class="form-control"></InputText>
-                    <ValidationMessage For="@(() => empleados.Dirección)" />
+                    <label>Comentario:</label>
+                    <InputText @bind-Value="reviews.Comentario" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => reviews.Comentario)" />
                 </div>
                 <div class="col-md-6">
-                    <label>Teléfono:</label>
-                    <InputText @bind-Value="empleados.Teléfono" class="form-control" placeholder="Ej: 8095877789"></InputText>
-                    <ValidationMessage For="@(() => empleados.Teléfono)" />
+                    <label>Valoraci&oacute;m:</label>
+                    <InputNumber @bind-Value="reviews.Valoración" class="form-control" min="1" max="10"></InputNumber>
+                    <ValidationMessage For="@(() => reviews.Valoración)" />
                 </div>
                 <div class="col-md-6">
-                    <label>Celular:</label>
-                    <InputText @bind-Value="empleados.Celular" class="form-control" placeholder="Ej: 8295877789"></InputText>
-                    <ValidationMessage For="@(() => empleados.Celular)" />
+                    <label>Fecha:</label>
+                    <InputDate @bind-Value="reviews.Fecha" class="form-control"></InputDate>
+                    <ValidationMessage For="@(() => reviews.Fecha)" />
                 </div>
             </div>
         </div>
@@ -62,30 +62,31 @@
 {
     [Parameter]
 
-    public int EmpleadoId { get; set; }
+    public int ReviewId { get; set; }
 
-    public Empleados empleados { get; set; } = new Empleados();
+    public Reviews reviews { get; set; } = new Reviews();
+    public Clientes clientes { get; set; } = new Clientes();
 
     protected override async Task OnInitializedAsync()
     {
-        if (EmpleadoId > 0)
+        if (ReviewId > 0)
         {
-            this.empleados.EmpleadoId = EmpleadoId;
+            this.reviews.ReviewId = ReviewId;
             await Buscar();
         }
     }
 
     public async Task Buscar()
     {
-        var empleadoIdEncontrado = (await httpClient.GetFromJsonAsync<List<Empleados>>($"api/Empleados"))!
+        var clienteIdEncontrado = (await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews"))!
         .ToList()
-        .Any(c => c.EmpleadoId == empleados.EmpleadoId);
-        if (empleadoIdEncontrado)
+        .Any(c => c.ReviewId == reviews.ReviewId);
+        if (clienteIdEncontrado)
         {
-            var empleadoEncontrado = await httpClient.GetFromJsonAsync<Empleados>($"api/Empleados/{empleados.EmpleadoId}");
-            if (empleadoEncontrado != null)
+            var clienteEncontrado = await httpClient.GetFromJsonAsync<Reviews>($"api/Reviews/{reviews.ReviewId}");
+            if (clienteEncontrado != null)
             {
-                this.empleados = empleadoEncontrado;
+                this.reviews = clienteEncontrado;
                 StateHasChanged();
             }
         }
@@ -95,7 +96,7 @@
                 {
                     Severity = NotificationSeverity.Error,
                     Summary = "Error",
-                    Detail = "No se encontro ningun empleado",
+                    Detail = "No se encontro ningun cliente",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
@@ -105,7 +106,7 @@
 
     public async Task Guardar()
     {
-        using var response = await httpClient.PostAsJsonAsync("api/Empleados", empleados);
+        using var response = await httpClient.PostAsJsonAsync("api/Reviews", reviews);
         if (!response.IsSuccessStatusCode)
         {
             var mensaje = new NotificationMessage
@@ -118,18 +119,18 @@
             notificationService.Notify(mensaje);
             return;
         }
-        var empleadoDevuelto = await response.Content.ReadFromJsonAsync<Empleados>();
-        if (empleadoDevuelto is not null)
+        var clienteDevuelto = await response.Content.ReadFromJsonAsync<Reviews>();
+        if (clienteDevuelto is not null)
         {
             var mensaje = new NotificationMessage
                 {
                     Severity = NotificationSeverity.Success,
                     Summary = "Validacion",
-                    Detail = "Empleado Guardado Correctamente",
+                    Detail = "cliente Guardado Correctamente",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
-            empleados = empleadoDevuelto;
+            reviews = clienteDevuelto;
             this.Nuevo();
             StateHasChanged();
         }
@@ -137,12 +138,12 @@
 
     public void Nuevo()
     {
-        this.empleados = new Empleados();
+        this.reviews = new Reviews();
     }
 
     public async Task Eliminar()
     {
-        using var response = await httpClient.DeleteAsync($"api/Empleados/{empleados.EmpleadoId}");
+        using var response = await httpClient.DeleteAsync($"api/Reviews/{reviews.ReviewId}");
         if (!response.IsSuccessStatusCode)
         {
             var mensaje = new NotificationMessage
@@ -161,7 +162,7 @@
                 {
                     Severity = NotificationSeverity.Success,
                     Summary = "Validacion",
-                    Detail = "Empleado Eliminado Correctamente",
+                    Detail = "cliente Eliminado Correctamente",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
