@@ -8,6 +8,8 @@ namespace AguaMariaSolution.Server.DAL
         public Contexto(DbContextOptions<Contexto> options) : base(options) { }
         public DbSet<Parametros> Parametros { get; set; }
         public DbSet<Empleados> Empleados { get; set; }
+        public DbSet<Clientes> Clientes { get; set; }
+        public DbSet<Reviews> Reviews { get; set; }
         public DbSet<ControlCalidadProductoTerminado> ControlCalidadProductoTerminado { get; set; }
         public DbSet<ProductoTerminadosDetalle> ProductoTerminadosDetalle { get; set; }
         public DbSet<ControlCalidadAgua> ControlCalidadAgua { get; set; }
