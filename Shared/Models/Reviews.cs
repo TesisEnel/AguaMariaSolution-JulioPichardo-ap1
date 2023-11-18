@@ -18,20 +18,11 @@ namespace AguaMariaSolution.Shared.Models
         public string? Comentario { get; set; }
 
         [Required(ErrorMessage = "Por favor ingrese una valoración")]
+        [Range(1, 10, ErrorMessage = "La valoración debe ser entre 1 y 10")]
         public int Valoración { get; set; }
-
-        [Required(ErrorMessage = "Debe ingresar el nombre del cliente")]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Este campo no acepta digitos")]
-        public string? Nombre { get; set; }
-
-        [Required(ErrorMessage = "Debe ingresar el apellido del cliente")]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Este campo no acepta digitos")]
-        public string? Apellido { get; set; }
-
-        [Required(ErrorMessage = "Debe ingresar el email del cliente")]
-        [EmailAddress(ErrorMessage = "Debe ingresar un email valido")]
-        public string? Email { get; set; }
-
         public DateTime Fecha { get; set; } = DateTime.Now;
+
+        [Required(ErrorMessage = "Por favor ingrese una valoración")]
+        public DateTime FechaDeBotellon{ get; set; } = DateTime.Now;
     }
 }
