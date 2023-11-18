@@ -147,7 +147,7 @@
         Hasta = DateTime.Now;
         await Buscar();
         PrimeraEntrada = false;
-        NotificarBusquedaMultiFiltro();
+        await NotificarBusquedaMultiFiltro();
     }
 
     public int ControlCalidadAguaId { get; set; }
@@ -167,7 +167,7 @@
         CCAgua = await httpClient.GetFromJsonAsync<List<ControlCalidadAgua>>($"api/ControlCalidadAguas");
         Conteo = CCAgua != null ? CCAgua!.Count() : 0;
 
-        if (CCAgua.Count() == 0)
+        if (Conteo == 0)
         {
             var mensaje = new NotificationMessage
                 {
@@ -202,7 +202,7 @@
         }
 
         Conteo = CCAgua != null ? CCAgua!.Count() : 0;
-        if (CCAgua.Count() == 0)
+        if (Conteo == 0)
         {
             var mensaje = new NotificationMessage
                 {
