@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using System.Net;
 @layout LoginLayout
 
 @inject HttpClient httpClient
@@ -13,7 +14,7 @@
     <div class="col-lg-4 offset-lg-4 border">
 
         <div class="card-header d-flex align-items-center">
-            <h1>LOGIN</h1><br />
+            <h1 class="text-center">LOGIN</h1><br />
             <img src="AguaMariaLogo.png" class="img-logo" />
         </div>
 
@@ -27,18 +28,18 @@
             <input type="password" @bind="login.Clave" class="form-control" />
         </div>
 
-        <div class="mb-3">
-            <button @onclick="IniciarSesion" class="btn btn-primary">Login</button>
+        <div class="mb-3 text-center">
+            <button @onclick="IniciarSesion" class="btn btn-primary text-center">Login</button>
         </div>
 
     </div>
+    <div class="text-center"></div>
 
 </div>
 
 
 @code {
     private LoginAMS login = new LoginAMS();
-
     private async Task IniciarSesion()
     {
         var loginResponse = await httpClient.PostAsJsonAsync<LoginAMS>("/api/Usuario/Login", login);
@@ -49,18 +50,19 @@
             await autenticacionExt.ActualizarEstadoAutenticacion(sesionUsuario);
 
             navManager.NavigateTo("/Index");
+
         }
-        else
+        if (loginResponse.StatusCode == HttpStatusCode.Unauthorized)
         {
             var mensaje = new NotificationMessage
                 {
                     Severity = NotificationSeverity.Error,
                     Summary = "Error",
-                    Detail = "Usuario o Contraseña Incorrectos",
+                    Detail = loginResponse.Content.ReadAsStringAsync().Result,
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
-            return;
+
         }
     }
 
