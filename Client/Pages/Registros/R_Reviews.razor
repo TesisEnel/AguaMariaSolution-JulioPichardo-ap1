@@ -20,29 +20,29 @@
                 @switch(ExisteCliente)
                 {
                     case true:
-                    <div class="col-md-6">
-                        <label>Nombre:</label>
-                        <InputText readonly @bind-Value="clientes.Nombre" class="form-control"></InputText>
-                        <ValidationMessage For="@(() => clientes.Nombre)" />
-                    </div>
-                    <div class="col-md-6">
-                        <label>Apellido:</label>
-                        <InputText readonly @bind-Value="clientes.Apellido" class="form-control"></InputText>
-                        <ValidationMessage For="@(() => clientes.Apellido)" />
-                    </div>
+                        <div class="col-md-6">
+                            <label>Nombre:</label>
+                            <InputText readonly @bind-Value="clientes.Nombre" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => clientes.Nombre)" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Apellido:</label>
+                            <InputText readonly @bind-Value="clientes.Apellido" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => clientes.Apellido)" />
+                        </div>
                     break;
-
+    
                     case false:
-                    <div class="col-md-6">
-                        <label>Nombre:</label>
-                        <InputText @bind-Value="clientes.Nombre" class="form-control"></InputText>
-                        <ValidationMessage For="@(() => clientes.Nombre)" />
-                    </div>
-                    <div class="col-md-6">
-                        <label>Apellido:</label>
-                        <InputText @bind-Value="clientes.Apellido" class="form-control"></InputText>
-                        <ValidationMessage For="@(() => clientes.Apellido)" />
-                    </div>
+                        <div class="col-md-6">
+                            <label>Nombre:</label>
+                            <InputText @bind-Value="clientes.Nombre" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => clientes.Nombre)" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Apellido:</label>
+                            <InputText @bind-Value="clientes.Apellido" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => clientes.Apellido)" />
+                        </div>
                     break;
                 }
                 <div class="col-md-6">
