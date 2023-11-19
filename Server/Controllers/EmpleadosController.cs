@@ -86,6 +86,10 @@ namespace AguaMariaSolution.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Empleados>> PostEmpleados(Empleados empleados)
         {
+            if (_context.Empleados.Any(e => e.Email == empleados.Email))
+            {
+                return StatusCode(StatusCodes.Status409Conflict, "Este email ya registrado");
+            }
             if (!EmpleadosExists(empleados.EmpleadoId))
                 _context.Empleados.Add(empleados);
             else
