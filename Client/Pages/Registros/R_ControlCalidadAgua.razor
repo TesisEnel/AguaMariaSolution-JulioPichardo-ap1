@@ -227,7 +227,10 @@
             this.controlCalidadAgua.ControlCalidadAguaId = controlCalidadAguaId;
             await Buscar();
         }
-
+        else
+        {
+            await BuscarUltimoDocumento();
+        }
         var mensaje = new NotificationMessage
             {
                 Severity = NotificationSeverity.Info,
@@ -283,7 +286,7 @@
     {
         try
         {
-            await httpClient.GetFromJsonAsync<ControlCalidadAgua>($"api/ControlCalidadAgua/{controlCalidadAgua.ControlCalidadAguaId}");
+            await httpClient.GetFromJsonAsync<ControlCalidadAgua>($"api/ControlCalidadAguas/{controlCalidadAgua.ControlCalidadAguaId}");
         }
         catch
         {
@@ -298,7 +301,7 @@
             this.Nuevo();
             return;
         }
-        var ControlCalidadAguaEncontrada = await httpClient.GetFromJsonAsync<ControlCalidadAgua>($"api/ControlCalidadAgua/{controlCalidadAgua.ControlCalidadAguaId}");
+        var ControlCalidadAguaEncontrada = await httpClient.GetFromJsonAsync<ControlCalidadAgua>($"api/ControlCalidadAguas/{controlCalidadAgua.ControlCalidadAguaId}");
         if (ControlCalidadAguaEncontrada != null)
         {
             this.controlCalidadAgua = ControlCalidadAguaEncontrada;
@@ -313,7 +316,7 @@
         {
             return;
         }
-        using var response = await httpClient.PostAsJsonAsync("api/ControlCalidadAgua", controlCalidadAgua);
+        using var response = await httpClient.PostAsJsonAsync("api/ControlCalidadAguas", controlCalidadAgua);
         if (!response.IsSuccessStatusCode)
         {
             var mensaje = new NotificationMessage
@@ -386,7 +389,7 @@
 
     public async Task Eliminar()
     {
-        using var response = await httpClient.DeleteAsync($"api/ControlCalidadAgua/{controlCalidadAgua.ControlCalidadAguaId}");
+        using var response = await httpClient.DeleteAsync($"api/ControlCalidadAguas/{controlCalidadAgua.ControlCalidadAguaId}");
         if (!response.IsSuccessStatusCode)
         {
             var mensaje = new NotificationMessage
@@ -504,7 +507,7 @@
         Valor = detalleRemover.Valor;
         controlCalidadAgua.ControlCalidadAguaDetalle.Remove(detalleRemover);
         DetallesRemovidos.Add(detalleRemover);
-        await httpClient.DeleteAsync($"api/ControlCalidadAgua/DeleteAguaDetalle/{detalleRemover.ControlCalidadAguaDetalleId}");
+        await httpClient.DeleteAsync($"api/ControlCalidadAguas/DeleteAguaDetalle/{detalleRemover.ControlCalidadAguaDetalleId}");
         StateHasChanged();
     }
 
@@ -555,6 +558,21 @@
             ListaEntidades = encontrados;
     }
 
-   
+    private async Task BuscarUltimoDocumento()
+    {
+        try
+        {
+            var documento = await httpClient.GetFromJsonAsync<ControlCalidadAgua>("api/ControlCalidadAguas/GetUltimoDocumento");
+            if (documento != null)
+            {
+                this.controlCalidadAgua = documento;
+                StateHasChanged();
+            }
+        }
+        catch
+        {
+            Nuevo();
+        }
+    }
 }
 

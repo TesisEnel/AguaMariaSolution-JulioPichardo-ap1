@@ -122,5 +122,30 @@ namespace AguaMariaSolution.Server.Controllers
         {
             return (_context.ControlCalidadAgua?.Any(e => e.ControlCalidadAguaId == id)).GetValueOrDefault();
         }
+
+        [HttpGet("GetUltimoDocumento")]
+        public async Task<ActionResult<ControlCalidadAgua>> GetUltimoDocumento()
+        {
+            if (!_context.ControlCalidadAgua.Any())
+            {
+                return NotFound();
+            }
+
+            var controlCalidadAgua = _context.ControlCalidadAgua
+                        .Include(c => c.ControlCalidadAguaDetalle)
+                        .OrderByDescending(c => c.Fecha).Take(1).FirstOrDefault();
+
+            if (controlCalidadAgua == null)
+            {
+                return NotFound();
+            }
+
+            if (controlCalidadAgua.Fecha.Date == DateTime.Now.Date)
+            {
+                return controlCalidadAgua;
+            }
+
+            return NotFound();
+        }
     }
 }
