@@ -114,15 +114,30 @@
         using var response = await httpClient.PostAsJsonAsync("api/Empleados", empleados);
         if (!response.IsSuccessStatusCode)
         {
-            var mensaje = new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = "Error",
-                    Detail = "No es posible Guardar",
-                    Duration = 4_000
-                };
-            notificationService.Notify(mensaje);
-            return;
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                var mensaje = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = response.Content.ReadAsStringAsync().Result,
+                        Duration = 4_000
+                    };
+                notificationService.Notify(mensaje);
+                return;
+            }
+            else
+            {
+                var mensaje = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "No es posible Guardar",
+                        Duration = 4_000
+                    };
+                notificationService.Notify(mensaje);
+                return;
+            }
         }
         var empleadoDevuelto = await response.Content.ReadFromJsonAsync<Empleados>();
         if (empleadoDevuelto is not null)
