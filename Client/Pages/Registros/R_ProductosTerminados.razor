@@ -165,6 +165,10 @@
             this.productosTerminados.ProductoTerminadoId = ProductoTerminadoId;
             await Buscar();
         }
+        else
+        {
+            await BuscarUltimoDocumento();
+        }
     }
 
     private async Task<ControlCalidadProductoTerminado> BuscarEntrada(int ProductoTerminadoId)
@@ -459,5 +463,23 @@
     {
         return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Máximo;
     }
+
+    private async Task BuscarUltimoDocumento()
+    {
+        try
+        {
+            var documento = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>("api/ControlCalidadProductoTerminado/GetUltimoDocumento");
+            if (documento != null)
+            {
+                this.productosTerminados = documento;
+                StateHasChanged();
+            }
+        }
+        catch
+        {
+            Nuevo();
+        }
+    }
+
 }
 

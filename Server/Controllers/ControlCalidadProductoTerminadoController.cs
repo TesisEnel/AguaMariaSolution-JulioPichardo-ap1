@@ -156,5 +156,30 @@ namespace AguaMariaSolution.Server.Controllers
         {
             return (_context.ControlCalidadProductoTerminado?.Any(e => e.ProductoTerminadoId == id)).GetValueOrDefault();
         }
+
+        [HttpGet("GetUltimoDocumento")]
+        public async Task<ActionResult<ControlCalidadProductoTerminado>> GetUltimoDocumento()
+        {
+            if (!_context.ControlCalidadProductoTerminado.Any())
+            {
+                return NotFound();
+            }
+
+            var ControlCalidadProductoTerminado = _context.ControlCalidadProductoTerminado
+                        .Include(c => c.ProductoTerminadosDetalle)
+                        .OrderByDescending(c => c.Fecha).Take(1).FirstOrDefault();
+
+            if (ControlCalidadProductoTerminado == null)
+            {
+                return NotFound();
+            }
+
+            if (ControlCalidadProductoTerminado.Fecha.Date == DateTime.Now.Date)
+            {
+                return ControlCalidadProductoTerminado;
+            }
+
+            return NotFound();
+        }
     }
 }
