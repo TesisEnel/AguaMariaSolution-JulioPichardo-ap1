@@ -7,6 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Pages\Consultas\C_ControlCalidadAgua.razor" />
+    <None Include="Pages\Consultas\C_Empleados.razor" />
+    <None Include="Pages\Consultas\C_ProductosTerminado.razor" />
+    <None Include="Pages\Registros\R_Clientes.razor" />
+    <None Include="Pages\Registros\R_ControlCalidadAgua.razor" />
+    <None Include="Pages\Registros\R_Empleados.razor" />
+    <None Include="Pages\Registros\R_ProductosTerminados.razor" />
+    <None Include="Pages\Registros\R_Reviews.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.13" PrivateAssets="all" />
     <PackageReference Include="Radzen.Blazor" Version="4.20.0" />

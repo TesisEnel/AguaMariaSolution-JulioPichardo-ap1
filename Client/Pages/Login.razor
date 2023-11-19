@@ -1,0 +1,68 @@
+﻿@page "/"
+@layout LoginLayout
+
+@inject HttpClient httpClient
+@inject AuthenticationStateProvider autenticacionProvider
+@inject NavigationManager navManager
+@inject NotificationService notificationService
+
+
+
+<div class="row mt-5">
+
+    <div class="col-lg-4 offset-lg-4 border">
+
+        <div class="card-header d-flex align-items-center">
+            <h1>LOGIN</h1><br />
+            <img src="AguaMariaLogo.png" class="img-logo" />
+        </div>
+
+        <div class="mb-3">
+            <label>Correo</label>
+            <input type="email" @bind="login.Correo" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Contraseña</label>
+            <input type="password" @bind="login.Clave" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <button @onclick="IniciarSesion" class="btn btn-primary">Login</button>
+        </div>
+
+    </div>
+
+</div>
+
+
+@code {
+    private LoginAMS login = new LoginAMS();
+
+    private async Task IniciarSesion()
+    {
+        var loginResponse = await httpClient.PostAsJsonAsync<LoginAMS>("/api/Usuario/Login", login);
+        if (loginResponse.IsSuccessStatusCode)
+        {
+            var sesionUsuario = await loginResponse.Content.ReadFromJsonAsync<SesionAMS>();
+            var autenticacionExt = (AutenticacionExtension)autenticacionProvider;
+            await autenticacionExt.ActualizarEstadoAutenticacion(sesionUsuario);
+
+            navManager.NavigateTo("/Index");
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Usuario o Contraseña Incorrectos",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+    }
+
+}
+

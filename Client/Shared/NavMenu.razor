@@ -10,50 +10,67 @@
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="/Index" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="RegistroEmpleado">
-                <span class="oi oi-plus" aria-hidden="true"></span> Registro Empleado
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="RegistroCliente">
-                <span class="oi oi-plus" aria-hidden="true"></span> Registro Cliente
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Reviews">
-                <span class="oi oi-plus" aria-hidden="true"></span> Review
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="RegistroProductoTerminado">
-                <span class="oi oi-plus" aria-hidden="true"></span> Control Calidad PT
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Registros/ControlCalidadAgua">
-                <span class="oi oi-plus" aria-hidden="true"></span> Control Calidad PA
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ConsultaProductoterminado">
-                <span class="oi oi-list" aria-hidden="true"></span> Consulta PT
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Consultar/ControlCalidadAgua">
-                <span class="oi oi-list" aria-hidden="true"></span> Consulta PA
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ConsultaEmpleado">
-                <span class="oi oi-list" aria-hidden="true"></span> Consulta Empleados
-            </NavLink>
-        </div>
+        <AuthorizeView Roles="Administrador, Empleado">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="RegistroProductoTerminado">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Control Calidad PT
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Registros/ControlCalidadAgua">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Control Calidad PA
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="ConsultaProductoterminado">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consulta PT
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Consultar/ControlCalidadAgua">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consulta PA
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Administrador">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="RegistroCliente">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registro Cliente
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="RegistroEmpleado">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registro Empleado
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="ConsultaEmpleado">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consulta Empleados
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Reviews">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Review
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Cliente">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Reviews">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Review
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
     </nav>
 </div>
 

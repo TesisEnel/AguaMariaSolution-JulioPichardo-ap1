@@ -1,6 +1,6 @@
 ﻿@page "/ConsultaEmpleado";
 @inject HttpClient httpClient
-
+@attribute [Authorize(Roles = "Administrador")]
 <div class="card-header row">
     <label>Filtrar ID:</label>
     <div class="col-md-6 input-group filter-input">

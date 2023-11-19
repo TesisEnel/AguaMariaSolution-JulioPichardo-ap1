@@ -2,6 +2,7 @@
 @page "/Reviews/{ReviewId:int}";
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
+@attribute [Authorize(Roles = "Administrador, Cliente")]
 
 <EditForm Model="reviews" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />

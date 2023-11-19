@@ -1,6 +1,6 @@
 ﻿@page "/ConsultaProductoterminado";
 @inject HttpClient httpClient
-
+@attribute [Authorize(Roles = "Administrador, Empleado")]
 <div class="card-header row">
     <div class="col-md-4">
         <label>Desde: </label>

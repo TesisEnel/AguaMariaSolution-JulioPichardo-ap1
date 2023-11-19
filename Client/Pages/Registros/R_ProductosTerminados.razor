@@ -2,6 +2,7 @@
 @page "/RegistroProductoTerminado/{ProductoTerminadoId:int}";
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
+@attribute [Authorize(Roles = "Administrador, Empleado")]
 
 <EditForm Model="productosTerminados" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />

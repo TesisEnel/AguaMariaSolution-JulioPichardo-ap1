@@ -2,6 +2,7 @@
 @page "/RegistroEmpleado/{EmpleadoId:int}";
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
+@attribute [Authorize(Roles = "Administrador")]
 
 <EditForm Model="empleados" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
@@ -31,6 +32,11 @@
                     <label>Email:</label>
                     <InputText type="email" @bind-Value="empleados.Email" class="form-control"></InputText>
                     <ValidationMessage For="@(() => empleados.Email)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Contraseña:</label>
+                    <InputText @bind-Value="empleados.Clave" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => empleados.Clave)" />
                 </div>
                 <div class="col-md-6">
                     <label>Dirección:</label>

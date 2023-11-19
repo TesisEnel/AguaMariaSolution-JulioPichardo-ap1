@@ -2,6 +2,7 @@
 @page "/RegistroCliente/{ClienteId:int}";
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
+@attribute [Authorize(Roles = "Administrador")]
 
 <EditForm Model="clientes" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />

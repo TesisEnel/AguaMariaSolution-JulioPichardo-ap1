@@ -2,7 +2,7 @@
 @page "/Registros/ControlCalidadAgua/{ControlCalidadAguaId:int}"
 @inject HttpClient httpClient
 @inject NotificationService notificationService
-
+@attribute [Authorize(Roles = "Administrador, Empleado")]
 <PageTitle>Registro Control Calidad Del Proceso Del Agua</PageTitle>
 
 <EditForm Model="controlCalidadAgua" OnValidSubmit="Guardar">
