@@ -3,14 +3,22 @@
 @inject NavigationManager navManager
 <RadzenNotification />
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
+    <AuthorizeView Roles="Administrador, Empleado">
+        <Authorized>
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+        </Authorized>
+    </AuthorizeView>
     <main>
-        <div class="top-row px-4">
-            <a @onclick="CerrarSesion" href="javascript:void(0)">Cerrar Sesion</a>
-        </div>
+        <AuthorizeView Roles="Administrador, Empleado">
+            <Authorized>
+                <div class="top-row px-4">
+                    <a @onclick="CerrarSesion" href="javascript:void(0)">Cerrar Sesion</a>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        
         <article class="content px-4">
             @Body
         </article>
