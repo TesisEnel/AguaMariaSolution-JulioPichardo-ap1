@@ -27,6 +27,9 @@ namespace AguaMariaSolution.Shared.Models
         [Required(ErrorMessage = "Campo Obligatorio")]
         public string? Dirección { get; set; }
 
+        [Required(ErrorMessage = "Campo Obligatorio")]
+        public string? Clave { get; set; }
+
         [RegularExpression(@"^\d{10}$", ErrorMessage = "Ingrese el telefono correctamente, Ejemplo: 8094587412")]
         [Required(ErrorMessage = "Campo Obligatorio")]
         public string? Teléfono { get; set; }
