@@ -12,11 +12,20 @@ namespace AguaMariaSolution.Shared.Models
         [Key]
         public int RecordId { get; set; }
         public DateTime Fecha { get; set; } = DateTime.Now;
-        public float Temperatura { get; set; }
-        public float Detergente { get; set; }
+
+        [Required(ErrorMessage = "Campo Obligatorio")]
+        [Range(120,float.MaxValue,ErrorMessage = "La Temperatura debe ser mayor o igual a 120°F")]
+        public float? Temperatura { get; set; }
+
+        [Required(ErrorMessage = "Campo Obligatorio")]
+        public float? Detergente { get; set; }
+
+        [Required(ErrorMessage = "Campo Obligatorio")]
         public string? AlcalinidadEnjuague { get; set; }
-        public string? DesinfectanteConcentración { get; set; }
-        public int ClienteId { get; set; }
+
+        [Required(ErrorMessage = "Campo Obligatorio")]
+        public float? DesinfectanteConcentración { get; set; }
+        public int EmpleadoId { get; set; }
         public string? AcciónTomada { get; set; }
     }
 }
