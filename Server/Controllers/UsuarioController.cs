@@ -26,6 +26,11 @@ namespace AguaMariaSolution.Server.Controllers
                 sesionAMS.Nombre = "admin";
                 sesionAMS.Correo = login.Correo;
                 sesionAMS.Rol = "Administrador";
+                return StatusCode(StatusCodes.Status200OK, sesionAMS);
+            }
+            else if(login.Correo == "julio@gmail.com" && login.Clave != "admin" || login.Correo == "abraham@gmail.com" && login.Clave != "admin")
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, "Contraseña incorrecta");
             }
 
             var empleadoEncontrado = await _context.Empleados.FirstOrDefaultAsync(e => e.Email == login.Correo);
