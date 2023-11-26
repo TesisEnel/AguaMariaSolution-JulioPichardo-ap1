@@ -39,5 +39,12 @@ namespace AguaMariaSolution.Shared.Models
 
         [ForeignKey("EmpleadoId")]
         public ICollection<ControlCalidadProductoTerminado> ControlCalidadProductoTerminado { get; set; } = new List<ControlCalidadProductoTerminado>();
+
+        [ForeignKey("EmpleadoId")]
+        public ICollection<RecordLavadoraBotellones> RecordLavadoraBotellones { get; set; } = new List<RecordLavadoraBotellones>();
+
+        [ForeignKey("EmpleadoId")]
+        public ICollection<ControlCalidadAgua> ControlCalidadAgua { get; set; } = new List<ControlCalidadAgua>();
     }
+
 }
