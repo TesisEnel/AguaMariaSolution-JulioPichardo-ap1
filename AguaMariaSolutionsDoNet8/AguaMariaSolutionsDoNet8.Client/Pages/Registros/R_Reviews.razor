@@ -1,0 +1,295 @@
+﻿@page "/ReviewsAguaMaria";
+@inject HttpClient httpClient
+@inject NotificationService notificationService;
+@rendermode InteractiveAuto
+<RadzenNotification />
+<EditForm Model="reviews" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header d-flex align-items-center">
+            <img src="AguaMariaLogo.png" class="img-logo" />
+            <h1>Reviews</h1>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Email:</label>
+                    <InputText type="email" @bind-Value="clientes.Email" class="form-control" @onblur="ObtenerOCrearCliente"></InputText>
+                    <ValidationMessage For="@(() => clientes.Email)" />
+                </div>
+                @switch (ExisteCliente)
+                {
+                    case true:
+                        <div class="col-md-6">
+                            <label>Nombre:</label>
+                            <InputText readonly @bind-Value="clientes.Nombre" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => clientes.Nombre)" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Apellido:</label>
+                            <InputText readonly @bind-Value="clientes.Apellido" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => clientes.Apellido)" />
+                        </div>
+                        break;
+
+                    case false:
+                        <div class="col-md-6">
+                            <label>Nombre:</label>
+                            <InputText @bind-Value="clientes.Nombre" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => clientes.Nombre)" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Apellido:</label>
+                            <InputText @bind-Value="clientes.Apellido" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => clientes.Apellido)" />
+                        </div>
+                        break;
+                }
+                <div class="col-md-6">
+                    <label>Comentario:</label>
+                    <InputText @bind-Value="reviews.Comentario" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => reviews.Comentario)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Valoraci&oacute;n:</label>
+                    <InputNumber @bind-Value="reviews.Valoración" class="form-control" min="1" max="10"></InputNumber>
+                    <ValidationMessage For="@(() => reviews.Valoración)" />
+                </div>
+                <div class="col-md-5">
+                    <label>Fecha del botellon</label>
+                    <InputDate @bind-Value="reviews.FechaDeBotellon" class="form-control"></InputDate>
+
+                    <ValidationMessage For="@(() => reviews.Fecha)" />
+                </div>
+                <div class="col-md-1">
+                    <label>Hora:</label>
+                    <input type="time" @bind="reviews.FechaDeBotellon" @bind:format=@HoraFormato />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <button class="btn btn-success">Enviar</button>
+        </div>
+    </div>
+</EditForm>
+
+
+@code
+{
+    [Parameter]
+
+    public int ReviewId { get; set; }
+
+    public Reviews reviews { get; set; } = new Reviews();
+    public Clientes clientes { get; set; } = new Clientes();
+
+    public bool ExisteCliente { get; set; } = true;
+    string HoraFormato = "HH:mm:ss";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ReviewId > 0)
+        {
+            this.reviews.ReviewId = ReviewId;
+            await Buscar();
+        }
+        else
+        {
+            Nuevo();
+        }
+    }
+
+    public async Task Buscar()
+    {
+        var clienteIdEncontrado = (await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews"))!
+        .ToList()
+        .Any(c => c.ReviewId == reviews.ReviewId);
+        if (clienteIdEncontrado)
+        {
+            var clienteEncontrado = await httpClient.GetFromJsonAsync<Reviews>($"api/Reviews/{reviews.ReviewId}");
+            if (clienteEncontrado != null)
+            {
+                this.reviews = clienteEncontrado;
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se encontro ningun cliente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+    }
+
+    public async Task Guardar()
+    {
+        var clienteTemporal = new Clientes();
+        if (!ExisteCliente)
+        {
+            if (ValidarGuardarCliente())
+            {
+                using var responseCliente = await httpClient.PostAsJsonAsync("api/Clientes", clientes);
+                var clienteEncontrado = await httpClient.GetFromJsonAsync<Clientes>($"api/Clientes/GetClienteEmail/{clientes.Email}");
+                clienteTemporal = clienteEncontrado;
+            }
+        }
+        else if (ExisteCliente)
+        {
+            clienteTemporal = clientes;
+        }
+
+        reviews.ClienteId = clienteTemporal.ClienteId;
+        reviews.Fecha = DateTime.Now;
+        using var response = await httpClient.PostAsJsonAsync("api/Reviews", reviews);
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Guardar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        var clienteDevuelto = await response.Content.ReadFromJsonAsync<Reviews>();
+        if (clienteDevuelto is not null)
+        {
+
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "review Guardado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            reviews = clienteDevuelto;
+            this.Nuevo();
+            StateHasChanged();
+        }
+    }
+
+    public bool ValidarGuardarCliente()
+    {
+        if (string.IsNullOrEmpty(clientes.Email))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Guardar, ingrese un email",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        if (string.IsNullOrEmpty(clientes.Nombre))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Guardar, ingrese un nombre",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        if (string.IsNullOrEmpty(clientes.Apellido))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Guardar, ingrese un apellido",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        return true;
+    }
+
+    public void Nuevo()
+    {
+        this.reviews = new Reviews();
+        this.clientes = new Clientes();
+        ExisteCliente = true;
+        reviews.Valoración = 5;
+    }
+
+    /*public async Task Eliminar()
+    {
+    using var response = await httpClient.DeleteAsync($"api/Reviews/{reviews.ReviewId}");
+        if (!response.IsSuccessStatusCode)
+                {
+                var mensaje = new NotificationMessage
+                {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error",
+                Detail = "No es posible Eliminar",
+        Duration = 4_000
+        };
+    notificationService.Notify(mensaje);
+        return;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                Severity = NotificationSeverity.Success,
+                Summary = "Validacion",
+                Detail = "cliente Eliminado Correctamente",
+            Duration = 4_000
+        };
+        notificationService.Notify(mensaje);
+
+    }
+    Nuevo();
+    }*/
+
+    public async Task ObtenerOCrearCliente()
+    {
+
+
+        if (string.IsNullOrEmpty(clientes.Email))
+        {
+            return;
+        }
+        if (!clientes.Email.Contains("@"))
+        {
+            return;
+        }
+        clientes.Email = clientes.Email.ToLower();
+        try
+        {
+            var clienteEncontrado = await httpClient.GetFromJsonAsync<Clientes>($"api/Clientes/GetClienteEmail/{clientes.Email}");
+            if (clienteEncontrado != null)
+            {
+                this.clientes = clienteEncontrado;
+                ExisteCliente = true;
+
+            }
+        }
+        catch
+        {
+            ExisteCliente = false;
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Info,
+                    Summary = "Crear Cuenta",
+                    Detail = "Agregue su nombre y apellido, sera linkeado su email.",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+        }
+    }
+}
