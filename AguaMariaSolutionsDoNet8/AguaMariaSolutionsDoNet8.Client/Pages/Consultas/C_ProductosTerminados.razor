@@ -19,7 +19,7 @@
             <option value="3">Empleado Id</option>
         </InputSelect>
         <div class="input-group-append">
-            <button type="button" class="btn btn-outline-primary oi oi-magnifying-glass" @onclick="Buscar"></button>
+            <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
         </div>
     </div>
     <div class="col-md-6">
@@ -38,7 +38,7 @@
     </div>
 </div>
 
-@if (ProductosTerminados is not null)
+@if (ListaProductosTerminados is not null)
 {
     <div class="table-responsive">
         <table class="table table-striped table-bordered">
@@ -53,12 +53,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var productosTerminados in ProductosTerminados)
+                @foreach (var productosTerminados in ListaProductosTerminados)
                 {
                     <tr>
                         <td>@productosTerminados.ProductoTerminadoId</td>
                         <td>@productosTerminados.AcciónTomada</td>
-                        <td>@productosTerminados.Fecha.ToString("dd/MM/yyyy")</td>
+                        <td>@productosTerminados.Fecha.ToString("MM/dd/yyyy")</td>
                         <td>@productosTerminados.Fecha.ToString("hh:mm:ss")</td>
                         <td>@ObtenerNombre(productosTerminados.EmpleadoId)</td>
                         <td><a href="RegistroProductoTerminado/@productosTerminados.ProductoTerminadoId">Ver</a></td>
@@ -76,7 +76,7 @@
 @code {
 
     public int Filtro { get; set; }
-    public List<ControlCalidadProductoTerminado>? ProductosTerminados { get; set; }
+    public List<ControlCalidadProductoTerminado>? ListaProductosTerminados { get; set; }
     public ControlCalidadProductoTerminado? productosTerminados { get; set; } = new ControlCalidadProductoTerminado();
     public List<Empleados> ListaEmpleados { get; set; } = new List<Empleados>();
 
@@ -103,14 +103,14 @@
     {
         if (Filtro == 1 && productosTerminados!.ProductoTerminadoId > 0)
         {
-            ProductosTerminados = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!.Where(t => t.ProductoTerminadoId == productosTerminados!.ProductoTerminadoId && t.Fecha >= Desde.Date && t.Fecha <= Hasta).ToList();
+            ListaProductosTerminados = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!.Where(t => t.ProductoTerminadoId == productosTerminados!.ProductoTerminadoId && t.Fecha >= Desde.Date && t.Fecha <= Hasta).ToList();
             StateHasChanged();
         }
         else
         if (Filtro == 2 && !string.IsNullOrEmpty(productosTerminados!.AcciónTomada))
         {
             var AcciónTomadaBusqueda = productosTerminados!.AcciónTomada.ToLower();
-            ProductosTerminados = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!
+            ListaProductosTerminados = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!
                 .Where(t => t.AcciónTomada != null && t.AcciónTomada.ToLower().Contains(AcciónTomadaBusqueda) && t.Fecha >= Desde.Date && t.Fecha <= Hasta)
                 .ToList();
             StateHasChanged();
@@ -118,15 +118,15 @@
         else
         if (Filtro == 3 && productosTerminados!.EmpleadoId > 0)
         {
-            ProductosTerminados = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!.Where(t => t.EmpleadoId == productosTerminados.EmpleadoId && t.Fecha >= Desde.Date && t.Fecha <= Hasta).ToList();
+            ListaProductosTerminados = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!.Where(t => t.EmpleadoId == productosTerminados.EmpleadoId && t.Fecha >= Desde.Date && t.Fecha <= Hasta).ToList();
             StateHasChanged();
         }
         else
         {
-            ProductosTerminados = await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado");
+            ListaProductosTerminados = await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado");
             StateHasChanged();
         }
-        Conteo = ProductosTerminados != null ? ProductosTerminados!.Count() : 0;
+        Conteo = ListaProductosTerminados != null ? ListaProductosTerminados!.Count() : 0;
     }
 
     public string ObtenerNombre(int Id)

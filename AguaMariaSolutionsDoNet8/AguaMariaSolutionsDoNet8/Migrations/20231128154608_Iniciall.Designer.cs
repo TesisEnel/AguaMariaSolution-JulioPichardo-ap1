@@ -3,6 +3,7 @@ using System;
 using AguaMariaSolutionsDoNet8.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AguaMariaSolutionsDoNet8.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231128154608_Iniciall")]
+    partial class Iniciall
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -512,6 +515,17 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.Personas", b =>
+                {
+                    b.Property<int>("PersonaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PersonaId");
+
+                    b.ToTable("Personas");
+                });
+
             modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.ProductoTerminadosDetalle", b =>
                 {
                     b.Property<int>("DetalleId")
@@ -535,46 +549,6 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                     b.HasIndex("ProductoTerminadoId");
 
                     b.ToTable("ProductoTerminadosDetalle");
-                });
-
-            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.Productos", b =>
-                {
-                    b.Property<int>("ProductoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("Imagen")
-                        .HasColumnType("BLOB");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("ProductoId");
-
-                    b.ToTable("Productos");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductoId = 1,
-                            Nombre = "Botella de Agua"
-                        },
-                        new
-                        {
-                            ProductoId = 2,
-                            Nombre = "5 Galones de Agua"
-                        },
-                        new
-                        {
-                            ProductoId = 3,
-                            Nombre = "1 Galon de Agua"
-                        },
-                        new
-                        {
-                            ProductoId = 4,
-                            Nombre = "Litro y Medio de Agua"
-                        });
                 });
 
             modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.RecordLavadoraBotellones", b =>
@@ -634,17 +608,12 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                     b.Property<DateTime>("FechaDeBotellon")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ProductoId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Valoración")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("ReviewId");
 
                     b.HasIndex("ClienteId");
-
-                    b.HasIndex("ProductoId");
 
                     b.ToTable("Reviews");
                 });
@@ -829,12 +798,6 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                         .HasForeignKey("ClienteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("AguaMariaSolutionsDoNet8.Shared.Models.Productos", null)
-                        .WithMany("Reviews")
-                        .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -910,11 +873,6 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                     b.Navigation("ControlCalidadProductoTerminado");
 
                     b.Navigation("RecordLavadoraBotellones");
-                });
-
-            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.Productos", b =>
-                {
-                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

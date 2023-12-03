@@ -1,0 +1,141 @@
+﻿@rendermode InteractiveAuto
+@page "/ConsultaProducto"
+@inject HttpClient httpClient
+@inject NotificationService notificationService
+@inject NavigationManager NavigationManager
+
+@attribute [Authorize]
+
+<div>
+    <div class="row justify-content-start ">
+        <div class="col-sm-10 col-md-9 col-lg-10 col-xl-xxl-7">
+            <div class="card">
+                <div class="card-header">
+                    <h1>Consulta Menú</h1>
+                    <div class="row">
+                        <label>Filtrar por</label>
+                        <div class="col">
+                            <InputSelect class="form-select" @bind-Value="Filtro">
+                                <option value="0" selected>ID</option>
+                                <option value="1">Nombre</option>
+                            </InputSelect>
+                        </div>
+                        <div class="col input-group">
+                            <button class="form-control btn btn-primary" type="button" @onclick="Buscar"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            @switch (Filtro)
+                            {
+                                case 0:
+                                    <InputNumber class="form-control" @bind-Value="productos.ProductoId"></InputNumber>
+                                    break;
+                                case 1:
+                                    <InputText class="form-control" @bind-Value="productos.Nombre"></InputText>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <div class="col">
+                            <h3>Listados de productos</h3>
+
+                        </div>
+                        @if(ListaProductos is not null)
+                        {
+                            @foreach (var productos in ListaProductos)
+                            {
+                                <div class="card">
+                                    <div class="container mt-5">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                @if (productos.Imagen != null)
+                                                {
+                                                    var base64 = Convert.ToBase64String(productos.Imagen);
+                                                    var imgSrc = $"data:image/jpeg;base64,{base64}";
+                                                    <img src="@imgSrc" alt="Imagen del producto" class="rounded mx-auto d-block img-fluid" style="max-width: 300px; max-height: 300px; margin: 5px;" />
+                                                }
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h2>@productos.Nombre</h2>
+                                                <strong> Nota promedio: </strong>
+                                                @for (int i = 0; i < 5; i++)
+                                                {
+                                                    double valoracionPromedio = productos.Reviews.Any() ? productos.Reviews.Average(r => r.Valoración) : 0;
+                                                    <i class="@(i < (valoracionPromedio/2) ? "bi bi-star-fill" : "bi bi-star")"></i>
+                                                }
+                                                <br />
+                                                @* <button class="btn btn-primary" href="RegistroComida/@tabla.ComidaId">Editar</button> *@
+                                                <button type="button" @onclick="(() => Registrar(productos.ProductoId))" class="btn btn-primary">Editar</button>
+                                                <button type="button" @onclick="(() => Valorar(productos.ProductoId))" class="btn btn-success">Valorar</button>
+                                                @* <a href="/RegistroMenu/@Productos.MenuId"><button type="button" class="btn btn-primary"><i class="oi oi-plus"> Editar</i></button></a>
+                                        <a href="/Comentarios/@Productos.MenuId"><button type="button" class="btn btn-warning"><i class="oi oi-plus"> Comentar</i></button></a> *@
+
+
+
+                                            </div>
+                                        </div>
+                                        <div class="row mt-5">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Productos>? ListaProductos { get; set; } = new List<Productos>();
+    public int Conteo = 0;
+    public int Filtro = 0;
+    public Productos productos = new Productos();
+    public List<Reviews>? ListaReviews { get; set; } = new List<Reviews>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var LReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews");
+        if(LReviews != null)
+            ListaReviews = LReviews;
+        await Buscar();
+    }
+
+    public async Task Buscar()
+    {
+        if (Filtro == 0 && productos!.ProductoId > 0)
+        {
+            ListaProductos = (await httpClient.GetFromJsonAsync<List<Productos>>($"api/Productos"))!.Where(t => t.ProductoId == productos!.ProductoId).ToList();
+            StateHasChanged();
+        }
+        else
+        if (Filtro == 1 && !string.IsNullOrEmpty(productos!.Nombre))
+        {
+            var AcciónTomadaBusqueda = productos!.Nombre.ToLower();
+            ListaProductos = (await httpClient.GetFromJsonAsync<List<Productos>>($"api/Productos"))!
+                .Where(t => t.Nombre != null && t.Nombre.ToLower().Contains(AcciónTomadaBusqueda))
+                .ToList();
+            StateHasChanged();
+        }
+        else
+        {
+            ListaProductos = await httpClient.GetFromJsonAsync<List<Productos>>($"api/Productos");
+            StateHasChanged();
+        }
+        Conteo = ListaProductos != null ? ListaProductos!.Count() : 0;
+    }
+    public void Valorar(int productoId)
+    {
+        NavigationManager.NavigateTo($"/ReviewsAguaMaria/{productoId}");
+    }
+    public void Registrar(int menuId)
+    {
+        NavigationManager.NavigateTo($"/RegistroProducto/{menuId}");
+    }
+}
