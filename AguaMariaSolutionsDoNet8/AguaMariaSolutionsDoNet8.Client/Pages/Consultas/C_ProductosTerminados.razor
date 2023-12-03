@@ -1,0 +1,138 @@
+﻿@page "/ConsultaProductoterminado";
+@inject HttpClient httpClient
+@attribute [Authorize]
+@rendermode InteractiveAuto
+<div class="card-header row">
+    <div class="col-md-4">
+        <label>Desde: </label>
+        <InputDate @bind-Value="Desde" class="form-control id-input"></InputDate>
+    </div>
+    <div class="col-md-4">
+        <label>Hasta: </label>
+        <InputDate @bind-Value="Hasta" class="form-control id-input"></InputDate>
+    </div>
+    <label>Filtrar Por:</label>
+    <div class="col-md-6 input-group filter-input">
+        <InputSelect @bind-Value="Filtro" class="form-select">
+            <option value="1">ProductoTerminado Id</option>
+            <option value="2">Acción Tomada</option>
+            <option value="3">Empleado Id</option>
+        </InputSelect>
+        <div class="input-group-append">
+            <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+        </div>
+    </div>
+    <div class="col-md-6">
+        @switch (Filtro)
+        {
+            case 1:
+                <InputNumber @bind-Value="productosTerminados!.ProductoTerminadoId" class="form-control"></InputNumber>
+                break;
+            case 2:
+                <InputText @bind-Value="productosTerminados!.AcciónTomada" class="form-control"></InputText>
+                break;
+            case 3:
+                <InputNumber @bind-Value="productosTerminados!.EmpleadoId" class="form-control"></InputNumber>
+                break;
+        }
+    </div>
+</div>
+
+@if (ListaProductosTerminados is not null)
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Producto Terminado ID</th>
+                    <th>Acción Tomada</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Empleado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var productosTerminados in ListaProductosTerminados)
+                {
+                    <tr>
+                        <td>@productosTerminados.ProductoTerminadoId</td>
+                        <td>@productosTerminados.AcciónTomada</td>
+                        <td>@productosTerminados.Fecha.ToString("MM/dd/yyyy")</td>
+                        <td>@productosTerminados.Fecha.ToString("hh:mm:ss")</td>
+                        <td>@ObtenerNombre(productosTerminados.EmpleadoId)</td>
+                        <td><a href="RegistroProductoTerminado/@productosTerminados.ProductoTerminadoId">Ver</a></td>
+                    </tr>
+                }
+                <tr>
+                    <td>Conteo: @Conteo</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+
+@code {
+
+    public int Filtro { get; set; }
+    public List<ControlCalidadProductoTerminado>? ListaProductosTerminados { get; set; }
+    public ControlCalidadProductoTerminado? productosTerminados { get; set; } = new ControlCalidadProductoTerminado();
+    public List<Empleados> ListaEmpleados { get; set; } = new List<Empleados>();
+
+    public int Conteo { get; set; }
+
+    public DateTime Desde { get; set; }
+    public DateTime Hasta { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var empleados = await httpClient.GetFromJsonAsync<List<Empleados>>("api/Empleados");
+
+        if (empleados is not null)
+        {
+            ListaEmpleados = empleados;
+        }
+        await Buscar();
+        Desde = DateTime.Now.AddMonths(-1);
+        Hasta = DateTime.Now;
+    }
+
+    public async Task Buscar()
+    {
+        if (Filtro == 1 && productosTerminados!.ProductoTerminadoId > 0)
+        {
+            ListaProductosTerminados = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!.Where(t => t.ProductoTerminadoId == productosTerminados!.ProductoTerminadoId && t.Fecha >= Desde.Date && t.Fecha <= Hasta).ToList();
+            StateHasChanged();
+        }
+        else
+        if (Filtro == 2 && !string.IsNullOrEmpty(productosTerminados!.AcciónTomada))
+        {
+            var AcciónTomadaBusqueda = productosTerminados!.AcciónTomada.ToLower();
+            ListaProductosTerminados = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!
+                .Where(t => t.AcciónTomada != null && t.AcciónTomada.ToLower().Contains(AcciónTomadaBusqueda) && t.Fecha >= Desde.Date && t.Fecha <= Hasta)
+                .ToList();
+            StateHasChanged();
+        }
+        else
+        if (Filtro == 3 && productosTerminados!.EmpleadoId > 0)
+        {
+            ListaProductosTerminados = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!.Where(t => t.EmpleadoId == productosTerminados.EmpleadoId && t.Fecha >= Desde.Date && t.Fecha <= Hasta).ToList();
+            StateHasChanged();
+        }
+        else
+        {
+            ListaProductosTerminados = await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado");
+            StateHasChanged();
+        }
+        Conteo = ListaProductosTerminados != null ? ListaProductosTerminados!.Count() : 0;
+    }
+
+    public string ObtenerNombre(int Id)
+    {
+        var empleado = ListaEmpleados.FirstOrDefault(p => p.EmpleadoId == Id);
+        return empleado?.Nombre ?? "Nombre no encontrado";
+    }
+}
+

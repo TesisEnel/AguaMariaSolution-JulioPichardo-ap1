@@ -1,0 +1,169 @@
+﻿@page "/ConsultaReviews";
+@inject HttpClient httpClient
+@attribute [Authorize]
+@rendermode InteractiveAuto
+<div class="card-header row">
+    <div class="col-md-4">
+        <label>Desde: </label>
+        <InputDate @bind-Value="Desde" class="form-control id-input"></InputDate>
+    </div>
+    <div class="col-md-4">
+        <label>Hasta: </label>
+        <InputDate @bind-Value="Hasta" class="form-control id-input"></InputDate>
+    </div>
+    <label>Filtrar Por:</label>
+    <div class="col-md-6 input-group filter-input">
+        <InputSelect @bind-Value="Filtro" class="form-select">
+            <option value="1">Review Id</option>
+            <option value="2">Cliente</option>
+            <option value="3">Producto</option>
+            <option value="4">Comentario</option>
+            <option value="5">Valoraci&oacute;n</option>
+        </InputSelect>
+        <div class="input-group-append">
+            <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+        </div>
+    </div>
+    <div class="col-md-6">
+        @switch (Filtro)
+        {
+            case 1:
+                <InputNumber @bind-Value="reviews!.ReviewId" class="form-control"></InputNumber>
+                break;
+            case 2:
+                <InputNumber @bind-Value="reviews!.ClienteId" class="form-control"></InputNumber>
+                break;
+            case 3:
+                <InputNumber @bind-Value="reviews!.ProductoId" class="form-control"></InputNumber>
+                break;
+            case 4:
+                <InputText @bind-Value="reviews!.Comentario" class="form-control"></InputText>
+                break;
+            case 5:
+                <InputNumber @bind-Value="reviews!.Valoración" class="form-control"></InputNumber>
+                break;
+        }
+    </div>
+</div>
+
+@if (ListaReviews is not null)
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Review ID</th>
+                    <th>Cliente</th>
+                    <th>Producto</th>
+                    <th>Comentario</th>
+                    <th>Valoración</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var Reviews in ListaReviews)
+                {
+                    <tr>
+                        <td>@Reviews.ReviewId</td>
+                        <td>@ObtenerNombreCliente(Reviews.ClienteId)</td>
+                        <td>@ObtenerNombreProducto(Reviews.ProductoId)</td>
+                        <td>@Reviews.Comentario</td>
+                        <td>@Reviews.Valoración</td>
+                        <td>@Reviews.Fecha.ToString("MM/dd/yyyy")</td>
+                        <td>@Reviews.Fecha.ToString("hh:mm:ss")</td>
+                        <td><a href="ReviewsAguaMaria/@Reviews.ReviewId">Ver</a></td>
+                    </tr>
+                }
+                <tr>
+                    <td>Conteo: @Conteo</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+
+@code {
+
+    public int Filtro { get; set; }
+    public List<Reviews>? ListaReviews { get; set; }
+    public Reviews? reviews { get; set; } = new Reviews();
+    public int Conteo { get; set; }
+    public List<Clientes> ListaClientes { get; set; } = new List<Clientes>();
+    public List<Productos> ListaProductos { get; set; } = new List<Productos>();
+
+    public DateTime Desde { get; set; }
+    public DateTime Hasta { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var clientes = await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes");
+        var productos = await httpClient.GetFromJsonAsync<List<Productos>>("api/Productos");
+
+        if (productos is not null)
+        {
+            ListaProductos = productos;
+        }
+        if (clientes is not null)
+        {
+            ListaClientes = clientes;
+        }
+        await Buscar();
+        Desde = DateTime.Now.AddMonths(-1);
+        Hasta = DateTime.Now;
+    }
+
+    public async Task Buscar()
+    {
+        if (Filtro == 1 && reviews!.ReviewId > 0)
+        {
+            var listaReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews/");
+            ListaReviews = listaReviews?.Where(r => r.ReviewId == reviews!.ReviewId && r.Fecha.Date >= Desde.Date && r.Fecha.Date <= Hasta.Date).ToList();
+        }else 
+        if (Filtro == 2 && reviews!.ClienteId > 0)
+        {
+            var listaReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews/");
+            ListaReviews = listaReviews?.Where(r => r.ClienteId == reviews!.ClienteId && r.Fecha.Date >= Desde.Date && r.Fecha.Date <= Hasta.Date).ToList();
+        }else
+        if(Filtro == 3 && reviews!.ProductoId > 0)
+        {
+            var listaReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews/");
+            ListaReviews = listaReviews?.Where(r => r.ProductoId == reviews!.ProductoId && r.Fecha.Date >= Desde.Date && r.Fecha.Date <= Hasta.Date).ToList();
+        }else
+        if(Filtro == 4 && !string.IsNullOrEmpty(reviews!.Comentario))
+        {
+            var comentarioBusqueda = reviews!.Comentario.ToLower();
+            ListaReviews = (await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews"))!
+                .Where(t => t.Comentario != null && t.Comentario.ToLower().Contains(comentarioBusqueda) && t.Fecha >= Desde.Date && t.Fecha <= Hasta)
+        .ToList();
+            StateHasChanged();
+        }else
+        if(Filtro == 5 && reviews!.Valoración > 0)
+        {
+            var listaReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews/");
+            ListaReviews = listaReviews?.Where(r => r.Valoración == reviews!.Valoración && r.Fecha.Date >= Desde.Date && r.Fecha.Date <= Hasta.Date).ToList();
+        }
+        else
+
+        {
+            ListaReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews");
+
+        }
+        Conteo = ListaReviews != null ? ListaReviews!.Count() : 0;
+        StateHasChanged();
+    }
+
+    public string ObtenerNombreCliente(int Id)
+    {
+        var clientes = ListaClientes.FirstOrDefault(p => p.ClienteId == Id);
+        return clientes?.Nombre ?? "Nombre no encontrado";
+    }
+
+    public string ObtenerNombreProducto(int Id)
+    {
+        var productos = ListaProductos.FirstOrDefault(p => p.ProductoId == Id);
+        return productos?.Nombre ?? "Nombre no encontrado";
+    }
+}

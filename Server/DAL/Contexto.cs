@@ -12,6 +12,7 @@ namespace AguaMariaSolution.Server.DAL
         public DbSet<Empleados> Empleados { get; set; }
         public DbSet<Clientes> Clientes { get; set; }
         public DbSet<Reviews> Reviews { get; set; }
+        public DbSet<RecordLavadoraBotellones> RecordLavadoraBotellones { get; set; }
         public DbSet<ControlCalidadProductoTerminado> ControlCalidadProductoTerminado { get; set; }
         public DbSet<ProductoTerminadosDetalle> ProductoTerminadosDetalle { get; set; }
         public DbSet<ControlCalidadAgua> ControlCalidadAgua { get; set; }

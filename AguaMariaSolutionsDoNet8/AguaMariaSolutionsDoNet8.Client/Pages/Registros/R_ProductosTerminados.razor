@@ -1,0 +1,485 @@
+﻿@page "/RegistroProductoTerminado";
+@page "/RegistroProductoTerminado/{ProductoTerminadoId:int}";
+@inject HttpClient httpClient
+@inject NotificationService notificationService;
+@attribute [Authorize]
+@rendermode InteractiveAuto
+<RadzenNotification />
+<EditForm Model="productosTerminados" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header d-flex align-items-center">
+            <img src="AguaMariaLogo.png" class="img-logo" />
+            <h1>Registro Control Calidad Producto Terminado</h1>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <label>Producto Id:</label>
+                <div class="input-group col-md-6">
+                    <InputNumber @bind-Value="productosTerminados.ProductoTerminadoId" class="id-input"></InputNumber>
+                    <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                </div>
+                <div class="col-md-6">
+                    <label>Fecha:</label>
+                    <InputDate @bind-Value="productosTerminados.Fecha" class="form-control"></InputDate>
+                    <ValidationMessage For="@(() => productosTerminados.Fecha)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Empleado:</label>
+                    <InputNumber @bind-Value="productosTerminados.EmpleadoId" class="form-control"></InputNumber>
+                    <ValidationMessage For="@(() => productosTerminados.EmpleadoId)" />
+                </div>
+
+            </div>
+        </div>
+        @*Detalles:*@
+        <div class="card card-header">
+            <h3>Parametros</h3>
+        </div>
+        <div class="card-body border border-1">
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Parametros</label>
+                    <InputSelect @bind-Value="Detalles.ParametroId" class="form-select">
+                        <option value="" hidden="hidden">Seleccione</option>
+                        @foreach (var p in ListaParametros)
+                        {
+                            if (p.ParametroId >= 1 && p.ParametroId <= 14)
+                            {
+                                <option value="@p.ParametroId">@p.Descripción</option>
+                            }
+                            if (p.ParametroId == 15)
+                                break;
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Detalles.ParametroId)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Valor</label>
+                    <div class="input-group">
+                        @switch (Detalles.ParametroId)
+                        {
+                            case 12:
+                                <InputSelect @bind-Value="Detalles.Valor">
+                                    <option value="" hidden="hidden">Seleccione</option>
+                                    <option value="1">Insípido</option>
+                                    <option value="0">sápido</option>
+                                </InputSelect>
+                                break;
+                            case 14:
+                                <InputSelect @bind-Value="Detalles.Valor">
+                                    <option value="" hidden="hidden">Seleccione</option>
+                                    <option value="1">Sí</option>
+                                    <option value="0">No</option>
+                                </InputSelect>
+                                break;
+                            default:
+                                <InputNumber @bind-Value="Detalles.Valor" class="form-control col-1"></InputNumber>
+                                break;
+                        }
+                        <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="oi oi-plus" />Add </button>
+                        <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="oi oi-reload" /> </button>
+                    </div>
+                </div>
+                @if (Detalles.ParametroId != 0)
+                {
+                    <div class="row">
+                        <div class="col-1">
+                            <label>M&iacute;nimo:</label>
+                            <h6>@ObtenerMínimo(Detalles.ParametroId)</h6>
+                        </div>
+
+                        <div class="col-1">
+                            <label>M&aacute;ximo:</label>
+                            <h6>@ObtenerMáximo(Detalles.ParametroId)</h6>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <table class='table table-responsive table-striped'>
+            <thead>
+                <tr>
+                    <th>Parametro Id</th>
+                    <th>Descripci&oacute;n</th>
+                    <th>M&iacute;nimo</th>
+                    <th>M&aacute;ximo</th>
+                    <th>Valor</th>
+                    <th>Pas&oacute;</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detalle in productosTerminados.ProductoTerminadosDetalle)
+                {
+                    <tr>
+                        <td>@detalle.ParametroId</td>
+                        <td>@ObtenerDescripción(detalle.ParametroId)</td>
+                        <td>@ObtenerMínimo(detalle.ParametroId)</td>
+                        <td>@ObtenerMáximo(detalle.ParametroId)</td>
+                        <td>@detalle.Valor</td>
+                        <td>@detalle.Pasó</td>
+                        <td><button type="button" class="btn btn-danger oi oi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <br />
+        <hr />
+        <div class="form-group col-10" style="margin: 5px;">
+            <label>Acci&oacute;n Tomada:</label>
+            <textarea @bind="productosTerminados.AcciónTomada" class="form-control" rows="3"></textarea>
+            <ValidationMessage For="@(() => productosTerminados.AcciónTomada)" />
+        </div>
+
+        <div class="card-footer text-center">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+        </div>
+    </div>
+</EditForm>
+
+@code
+{
+    [Parameter]
+    public int ProductoTerminadoId { get; set; }
+
+    public ControlCalidadProductoTerminado productosTerminados { get; set; } = new ControlCalidadProductoTerminado();
+    public ProductoTerminadosDetalle Detalles { get; set; } = new ProductoTerminadosDetalle();
+    public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
+    public List<ProductoTerminadosDetalle> DetallesRemovidos { get; set; } = new List<ProductoTerminadosDetalle>();
+    public List<ProductoTerminadosDetalle> ListaDetalles { get; set; } = new List<ProductoTerminadosDetalle>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var Parametros = await httpClient.GetFromJsonAsync<List<Parametros>>("api/Parametros");
+
+        if (Parametros is not null)
+        {
+            ListaParametros = Parametros;
+        }
+        if (ProductoTerminadoId > 0)
+        {
+            this.productosTerminados.ProductoTerminadoId = ProductoTerminadoId;
+            await Buscar();
+        }
+        else
+        {
+            await BuscarUltimoDocumento();
+        }
+    }
+
+    private async Task<ControlCalidadProductoTerminado> BuscarEntrada(int ProductoTerminadoId)
+    {
+        ControlCalidadProductoTerminado ControlCalidadProductoTerminado = new ControlCalidadProductoTerminado();
+        var productoTerminadoEncontrado = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{ProductoTerminadoId}");
+        if (productoTerminadoEncontrado != null)
+            return ControlCalidadProductoTerminado = productoTerminadoEncontrado;
+        return new ControlCalidadProductoTerminado();
+    }
+
+    public string ObtenerDescripción(int Id)
+    {
+        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Descripción!;
+    }
+
+    public async Task Buscar()
+    {
+        ListaDetalles = new List<ProductoTerminadosDetalle>();
+        var productoTerminadoIdEncontrado = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!
+        .ToList()
+        .Any(e => e.ProductoTerminadoId == productosTerminados.ProductoTerminadoId);
+        if (productoTerminadoIdEncontrado)
+        {
+            var productoTerminadoEncontrado = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{productosTerminados.ProductoTerminadoId}");
+            if (productoTerminadoEncontrado != null)
+            {
+                this.productosTerminados = productoTerminadoEncontrado;
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se encontro ningun Control de Calidad",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+    }
+
+    public bool ValidarGuardar()
+    {
+        if (productosTerminados.ProductoTerminadosDetalle.Count == 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se puede guardar un registro sin detalles.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        if (productosTerminados.ProductoTerminadosDetalle.GroupBy(d => d.ParametroId).Any(group => group.Count() > 1))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se puede guardar un registro con más de un mismo parametro.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        return true;
+    }
+
+    public async Task Guardar()
+    {
+        if (!ValidarGuardar())
+        {
+            return;
+        }
+        using var response = await httpClient.PostAsJsonAsync("api/ControlCalidadProductoTerminado", productosTerminados);
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se pudo Guardar correctamente, verifique los campos",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        var controlCalidadProductoTerminado = await response.Content.ReadFromJsonAsync<ControlCalidadProductoTerminado>();
+        if (controlCalidadProductoTerminado is not null)
+        {
+            if (DetallesRemovidos.Count > 0)
+            {
+                foreach (var detalle in DetallesRemovidos)
+                {
+                    await httpClient.DeleteAsync($"api/ControlCalidadProductoTerminado/DeleteDetalles/{detalle.DetalleId}");
+                }
+            }
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Control de Calidad Guardado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            productosTerminados = controlCalidadProductoTerminado;
+            StateHasChanged();
+            this.Nuevo();
+        }
+    }
+
+    public void Nuevo()
+    {
+        this.productosTerminados = new ControlCalidadProductoTerminado();
+        this.Detalles = new ProductoTerminadosDetalle();
+        DetallesRemovidos = new List<ProductoTerminadosDetalle>();
+        ListaDetalles = new List<ProductoTerminadosDetalle>();
+    }
+
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/ControlCalidadProductoTerminado/{productosTerminados.ProductoTerminadoId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "El Control de Calidad no fue Eliminada Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Control de Calidad Eliminado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+        }
+        Nuevo();
+    }
+
+    public bool ValidarDetalle()
+    {
+        if (Detalles.ParametroId == 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Debe seleccionar un parámetro.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return true;
+        }
+
+        if (Detalles.Valor < 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Debe ingresar un valor.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return true;
+        }
+        return false;
+    }
+
+    public async Task AgregarDetalle()
+    {
+        if (ValidarDetalle())
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Llene los campos del detalle Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        if (productosTerminados.ProductoTerminadosDetalle.Any(d => d.ParametroId == Detalles.ParametroId))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Ya tiene agregado un detalle con este mismo parámetro, elimine uno antes de guardar.",
+                    Duration = 7000,
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        if (productosTerminados != null)
+        {
+            Detalles.ProductoTerminadoId = productosTerminados.ProductoTerminadoId;
+            productosTerminados.ProductoTerminadosDetalle.Add(Detalles);
+            ListaDetalles.Add(Detalles);
+            if (DetallesRemovidos.Any(d => d.DetalleId == Detalles.DetalleId))
+                DetallesRemovidos.Remove(Detalles);
+            Detalles.Pasó = ValidarSiPasoDetalle();
+            Detalles = new ProductoTerminadosDetalle();
+
+        }
+        StateHasChanged();
+    }
+
+    public void RemoverDetalle(ProductoTerminadosDetalle detalle)
+    {
+        Detalles = detalle;
+        productosTerminados.ProductoTerminadosDetalle.Remove(detalle);
+        DetallesRemovidos.Add(detalle);
+        if (ListaDetalles.Any(d => d.DetalleId == detalle.DetalleId))
+            ListaDetalles.Remove(detalle);
+        StateHasChanged();
+    }
+
+    public void Deshacer()
+    {
+        var detalleDeshacer = DetallesRemovidos.FirstOrDefault();
+        if (detalleDeshacer is null)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "No hay detalles",
+                    Detail = "No tiene ningun detalle removido para deshacerlo.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
+        if (productosTerminados.ProductoTerminadosDetalle.Any(d => d.ParametroId == detalleDeshacer.ParametroId))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Cuidado",
+                    Detail = "Ya tiene agregado un detalle con este mismo parámetro, elimine uno antes de guardar.",
+                    Duration = 7000,
+                };
+            notificationService.Notify(mensaje);
+        }
+
+
+        productosTerminados.ProductoTerminadosDetalle.Add(detalleDeshacer);
+        DetallesRemovidos.Remove(detalleDeshacer);
+        StateHasChanged();
+    }
+
+    public bool ValidarSiPasoDetalle()
+    {
+        var Mínimo = ListaParametros.Where(p => p.ParametroId == Detalles.ParametroId).FirstOrDefault()!.Mínimo;
+        var Máximo = ListaParametros.Where(p => p.ParametroId == Detalles.ParametroId).FirstOrDefault()!.Máximo;
+        if (Detalles.Valor >= Mínimo && Detalles.Valor <= Máximo)
+            return true;
+        else
+            return false;
+    }
+
+    private async Task<Parametros> BuscarParametros(int ParametroId)
+    {
+        var producto = await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{ParametroId}");
+
+        return producto ?? new Parametros();
+    }
+
+    public float ObtenerMínimo(int Id)
+    {
+        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Mínimo;
+    }
+
+    public float ObtenerMáximo(int Id)
+    {
+        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Máximo;
+    }
+
+    private async Task BuscarUltimoDocumento()
+    {
+        try
+        {
+            var documento = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>("api/ControlCalidadProductoTerminado/GetUltimoDocumento");
+            if (documento != null)
+            {
+                this.productosTerminados = documento;
+                StateHasChanged();
+            }
+        }
+        catch
+        {
+            Nuevo();
+        }
+    }
+
+}
+

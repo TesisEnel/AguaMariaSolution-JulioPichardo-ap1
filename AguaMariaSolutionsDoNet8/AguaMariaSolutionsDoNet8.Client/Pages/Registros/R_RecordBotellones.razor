@@ -1,0 +1,247 @@
+﻿@page "/RecordBotellones";
+@page "/RecordBotellones/{RecordId:int}";
+@inject HttpClient httpClient
+@inject NotificationService notificationService;
+@attribute [Authorize]
+@rendermode InteractiveAuto
+<RadzenNotification />
+<EditForm Model="recordLavadoraBotellones" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header d-flex align-items-center">
+            <img src="AguaMariaLogo.png" class="img-logo" />
+            <h1>Registro de RecordLavadoraBotellones</h1>
+        </div>
+        <div class="card-body">
+            <label>ID:</label>
+            <div class="input-group">
+                <InputNumber @bind-Value="recordLavadoraBotellones.RecordId" class="id-input"></InputNumber>
+                <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>EmpleadoId:</label>
+                    <InputNumber @bind-Value="recordLavadoraBotellones.EmpleadoId" class="form-control"></InputNumber>
+                    <ValidationMessage For="@(() => recordLavadoraBotellones.EmpleadoId)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Fecha:</label>
+                    <InputDate @bind-Value="recordLavadoraBotellones.Fecha" class="form-control"></InputDate>
+                    <ValidationMessage For="@(() => recordLavadoraBotellones.Fecha)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Temperatura °F:</label>
+                    <InputNumber @bind-Value="recordLavadoraBotellones.Temperatura" class="form-control" placeholder="120°F" @onblur="Advertencia"></InputNumber>
+                    <ValidationMessage For="@(() => recordLavadoraBotellones.Temperatura)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Detergente (%):</label>
+                    <InputNumber @bind-Value="recordLavadoraBotellones.Detergente" class="form-control" placeholder="0.1%"></InputNumber>
+                    <ValidationMessage For="@(() => recordLavadoraBotellones.Detergente)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Alcalinidad & Enjuague:</label>
+                    <InputSelect @bind-Value="recordLavadoraBotellones.AlcalinidadEnjuague" class="form-select">
+                        <option value="" hidden="hidden">Seleccione</option>
+                        <option value="Alcalino">Alcalino</option>
+                        <option value="No Alcalino">No Alcalino</option>
+                    </InputSelect>
+                    <ValidationMessage For="@(() => recordLavadoraBotellones.AlcalinidadEnjuague)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Desinfectante y Concentración (mg/l):</label>
+                    <InputNumber @bind-Value="recordLavadoraBotellones.DesinfectanteConcentración" class="form-control" placeholder="0.05mg/l"></InputNumber>
+                    <ValidationMessage For="@(() => recordLavadoraBotellones.DesinfectanteConcentración)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Acci&oacute;n Tomada:</label>
+                    <InputText @bind-Value="recordLavadoraBotellones.AcciónTomada" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => recordLavadoraBotellones.AcciónTomada)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+        </div>
+    </div>
+</EditForm>
+
+
+@code
+{
+    [Parameter]
+
+    public int RecordId { get; set; }
+
+    public RecordLavadoraBotellones recordLavadoraBotellones { get; set; } = new RecordLavadoraBotellones();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (RecordId > 0)
+        {
+            this.recordLavadoraBotellones.RecordId = RecordId;
+            await Buscar();
+        }
+    }
+
+    public async Task Buscar()
+    {
+        var recordIdEncontrado = (await httpClient.GetFromJsonAsync<List<RecordLavadoraBotellones>>($"api/RecordLavadoraBotellones"))!
+        .ToList()
+        .Any(c => c.RecordId == recordLavadoraBotellones.RecordId);
+        if (recordIdEncontrado)
+        {
+            var recordEncontrado = await httpClient.GetFromJsonAsync<RecordLavadoraBotellones>($"api/RecordLavadoraBotellones/{recordLavadoraBotellones.RecordId}");
+            if (recordEncontrado != null)
+            {
+                this.recordLavadoraBotellones = recordEncontrado;
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se encontro ningun record",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+    }
+
+    public void Advertencia()
+    {
+        if (recordLavadoraBotellones.Temperatura < 120)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Agua no caliente",
+                    Detail = "Temperatura debe ser mayor o igual a 120°F",
+                    Duration = 7_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (recordLavadoraBotellones.Detergente <= 0 && recordLavadoraBotellones.DesinfectanteConcentración <= 0)
+        {
+            var mensajeDetergente = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Detergente debe ser mayor a 0",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensajeDetergente);
+
+            var mensajeDesinfectante = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Desinfectante debe ser mayor a 0",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensajeDesinfectante);
+
+            return;
+        }
+
+        if (recordLavadoraBotellones.Detergente <= 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = " El Detergente debe ser mayor a 0",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
+        if (recordLavadoraBotellones.DesinfectanteConcentración <= 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "El Desinfectante debe ser mayor a 0",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        using var response = await httpClient.PostAsJsonAsync("api/RecordLavadoraBotellones", recordLavadoraBotellones);
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Guardar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        var recordDevuelto = await response.Content.ReadFromJsonAsync<RecordLavadoraBotellones>();
+        if (recordDevuelto is not null)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Éxito",
+                    Detail = "Record Guardado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            recordLavadoraBotellones = recordDevuelto;
+            this.Nuevo();
+            StateHasChanged();
+        }
+    }
+
+    public void Nuevo()
+    {
+        this.recordLavadoraBotellones = new RecordLavadoraBotellones();
+    }
+
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/RecordLavadoraBotellones/{recordLavadoraBotellones.RecordId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Eliminar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Érror",
+                    Detail = "Record Eliminado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+
+        }
+        Nuevo();
+    }
+}

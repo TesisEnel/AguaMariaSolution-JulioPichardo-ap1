@@ -1,0 +1,100 @@
+﻿@page "/ConsultaRecords";
+@inject HttpClient httpClient
+@attribute [Authorize]
+@rendermode InteractiveAuto
+<div class="card-header row">
+    <label>Filtrar ID:</label>
+    <div class="col-md-6 input-group filter-input">
+        <InputNumber @bind-Value="Filtro" class="form-control"></InputNumber>
+        <div class="input-group-append">
+            <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+        </div>
+    </div>
+</div>
+
+@if (RecordLavadoraBotellones is not null)
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Record ID</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Empleado</th>
+                    <th>Temperatura</th>
+                    <th>Detergente</th>
+                    <th>Alcalinidad & Enjuague</th>
+                    <th>Desinfectante y Concentraci&oacute;n</th>
+                    <th>Acci&oacute;n Tomada</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var RecordLavadoraBotellones in RecordLavadoraBotellones)
+                {
+                    <tr>
+                        <td>@RecordLavadoraBotellones.RecordId</td>
+                        <td>@RecordLavadoraBotellones.Fecha.ToString("MM/dd/yyyy")</td>
+                        <td>@RecordLavadoraBotellones.Fecha.ToString("hh:mm:ss")</td>
+                        <td>@ObtenerNombre(RecordLavadoraBotellones.EmpleadoId)</td>
+                        <td>@RecordLavadoraBotellones.Temperatura °F</td>
+                        <td>@RecordLavadoraBotellones.Detergente %</td>
+                        <td>@RecordLavadoraBotellones.AlcalinidadEnjuague</td>
+                        <td>@RecordLavadoraBotellones.DesinfectanteConcentración mg/l</td>
+                        <td>@RecordLavadoraBotellones.AcciónTomada</td>
+                        <td><a href="RecordBotellones/@RecordLavadoraBotellones.RecordId">Ver</a></td>
+                    </tr>
+                }
+                <tr>
+                    <td>Conteo: @Conteo</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+
+@code {
+
+    public int Filtro { get; set; }
+    public List<RecordLavadoraBotellones>? RecordLavadoraBotellones { get; set; }
+    public RecordLavadoraBotellones? recordLavadoraBotellones { get; set; } = new RecordLavadoraBotellones();
+    public int Conteo { get; set; }
+    public List<Empleados> ListaEmpleados { get; set; } = new List<Empleados>();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var empleados = await httpClient.GetFromJsonAsync<List<Empleados>>("api/Empleados");
+
+        if (empleados is not null)
+        {
+            ListaEmpleados = empleados;
+        }
+        await Buscar();
+    }
+
+    public async Task Buscar()
+    {
+        if (Filtro == 0)
+        {
+            RecordLavadoraBotellones = await httpClient.GetFromJsonAsync<List<RecordLavadoraBotellones>>($"api/RecordLavadoraBotellones");
+        }
+        else
+        {
+            var listaRecords = await httpClient.GetFromJsonAsync<List<RecordLavadoraBotellones>>($"api/RecordLavadoraBotellones/");
+            RecordLavadoraBotellones = listaRecords?.Where(c => c.RecordId == Filtro).ToList();
+        }
+        Conteo = RecordLavadoraBotellones != null ? RecordLavadoraBotellones!.Count() : 0;
+        StateHasChanged();
+    }
+
+    public string ObtenerNombre(int Id)
+    {
+        var empleado = ListaEmpleados.FirstOrDefault(p => p.EmpleadoId == Id);
+        return empleado?.Nombre ?? "Nombre no encontrado";
+    }
+
+}

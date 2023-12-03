@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AguaMariaSolution.Shared.Models
+namespace AguaMariaSolutionsDoNet8.Shared.Models
 {
     public class Empleados
     {
