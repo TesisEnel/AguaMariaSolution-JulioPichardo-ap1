@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">AguaMariaSolution</a>
+        <a class="navbar-brand">AguaMariaSolution</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -14,45 +14,122 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <AuthorizeView Roles="Administrador, Empleado">
+        <!--Registros y consultas empleados-->
+        <AuthorizeView Roles="Empleado">
             <Authorized>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="RegistroProductoTerminado">
-                        <span class="oi oi-plus" aria-hidden="true"></span> Control Calidad PT
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registrar Calidad PT
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="Registros/ControlCalidadAgua">
-                        <span class="oi oi-plus" aria-hidden="true"></span> Control Calidad PA
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registrar Calidad PA
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="ConsultaProductoterminado">
                         <span class="oi oi-list" aria-hidden="true"></span> Consulta PT
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="Consultar/ControlCalidadAgua">
                         <span class="oi oi-list" aria-hidden="true"></span> Consulta PA
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultas/Referencias">
+                        <span class="oi oi-list" aria-hidden="true"></span>Consultar Referencias
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/EntidadesMuestreoAgua">
+                        <span class="oi oi-list" aria-hidden="true"></span>Consultar Entidades de Muestro
                     </NavLink>
                 </div>
             </Authorized>
         </AuthorizeView>
         <AuthorizeView Roles="Administrador">
+            <!--Registros y consultas Admin-->
             <Authorized>
-                <div class="nav-item px-3">
+
+                <div class="navbar-text px-3 text-white">Registro y Consultas <br /> de Documentos</div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="RegistroProductoTerminado">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registrar Calidad PT
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/ControlCalidadAgua">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registrar Calidad PA
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="ConsultaProductoterminado">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consulta PT
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/ControlCalidadAgua">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consulta PA
+                    </NavLink>
+                </div>
+                <div class="navbar-text px-3 text-white">Registros de Entidades</div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/Parametros">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registro Par&aacute;metros
+                    </NavLink>
+                </div>
+                <div class="nav-item">
                     <NavLink class="nav-link" href="RegistroCliente">
                         <span class="oi oi-plus" aria-hidden="true"></span> Registro Cliente
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="RegistroEmpleado">
                         <span class="oi oi-plus" aria-hidden="true"></span> Registro Empleado
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/Admins">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registro Admins
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/referencias">
+                        <span class="oi oi-plus" aria-hidden="true" style="font-size: smaller;"></span> Registro de referencias
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/EntidadesMuestreoAgua">
+                        <span class="oi oi-plus" aria-hidden="true" style="font-size: smaller;"></span>Registro Entidades de Muestreo
+                    </NavLink>
+                </div>
+
+                <div class="navbar-text px-3 text-white">Consultas de Entidades</div>
+                <div class="nav-item">
                     <NavLink class="nav-link" href="ConsultaEmpleado">
                         <span class="oi oi-list" aria-hidden="true"></span> Consulta Empleados
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/Parametros">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consultar Par&aacute;metros
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/Admins">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consultar Admins
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultas/Referencias">
+                        <span class="oi oi-list" aria-hidden="true" ></span>Consultar Referencias
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/EntidadesMuestreoAgua">
+                        <span class="oi oi-list" aria-hidden="true"></span>Consultar Entidades de Muestro
                     </NavLink>
                 </div>
             </Authorized>
