@@ -123,6 +123,24 @@ namespace AguaMariaSolution.Server.Controllers
             return (_context.ControlCalidadAgua?.Any(e => e.ControlCalidadAguaId == id)).GetValueOrDefault();
         }
 
+        [HttpDelete("DeleteAguaDetalle/{id}")]
+        public async Task<IActionResult> DeleteAguaDetalle(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
+            var Detalle = await _context.ControlCalidadAguaDetalle.FirstOrDefaultAsync(ad => ad.ControlCalidadAguaDetalleId == id);
+            if (Detalle is null)
+            {
+                return NotFound();
+            }
+            _context.ControlCalidadAguaDetalle.Remove(Detalle);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         [HttpGet("GetUltimoDocumento")]
         public async Task<ActionResult<ControlCalidadAgua>> GetUltimoDocumento()
         {

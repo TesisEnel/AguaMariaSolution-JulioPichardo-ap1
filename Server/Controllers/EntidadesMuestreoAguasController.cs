@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AguaMariaSolution.Server.DAL;
 using AguaMariaSolution.Shared.Models;
+using AguaMariaSolution.Client.Pages.Registros;
 
 namespace AguaMariaSolution.Server.Controllers
 {
@@ -23,24 +24,26 @@ namespace AguaMariaSolution.Server.Controllers
 
         // GET: api/EntidadesMuestreoAguas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EntidadesMuestreoAgua>>> GetEntidadesMuestreoAgua()
+        public async Task<ActionResult<IEnumerable<EntidadesMuestreoAguas>>> GetEntidadesMuestreoAgua()
         {
-          if (_context.EntidadesMuestreoAgua == null)
+          if (_context.EntidadesMuestreoAguas == null)
           {
               return NotFound();
           }
-            return await _context.EntidadesMuestreoAgua.ToListAsync();
+            return await _context.EntidadesMuestreoAguas.Include(e => e.ListaParametros).ToListAsync();
         }
 
         // GET: api/EntidadesMuestreoAguas/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<EntidadesMuestreoAgua>> GetEntidadesMuestreoAgua(int id)
+        public async Task<ActionResult<EntidadesMuestreoAguas>> GetEntidadesMuestreoAgua(int id)
         {
-          if (_context.EntidadesMuestreoAgua == null)
+          if (_context.EntidadesMuestreoAguas == null)
           {
               return NotFound();
           }
-            var entidadesMuestreoAgua = await _context.EntidadesMuestreoAgua.FindAsync(id);
+            var entidadesMuestreoAgua = await _context.EntidadesMuestreoAguas.Include(e => e.ListaParametros)
+                                                        .Where(e => e.EntidadesMuestreoAguaId == id)
+                                                        .FirstOrDefaultAsync(); ;
 
             if (entidadesMuestreoAgua == null)
             {
@@ -53,7 +56,7 @@ namespace AguaMariaSolution.Server.Controllers
         // PUT: api/EntidadesMuestreoAguas/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEntidadesMuestreoAgua(int id, EntidadesMuestreoAgua entidadesMuestreoAgua)
+        public async Task<IActionResult> PutEntidadesMuestreoAgua(int id, EntidadesMuestreoAguas entidadesMuestreoAgua)
         {
             if (id != entidadesMuestreoAgua.EntidadesMuestreoAguaId)
             {
@@ -84,33 +87,31 @@ namespace AguaMariaSolution.Server.Controllers
         // POST: api/EntidadesMuestreoAguas
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<EntidadesMuestreoAgua>> PostEntidadesMuestreoAgua(EntidadesMuestreoAgua entidadesMuestreoAgua)
+        public async Task<ActionResult<EntidadesMuestreoAguas>> PostEntidadesMuestreoAgua(EntidadesMuestreoAguas entidadesMuestreoAgua)
         {
-          if (_context.EntidadesMuestreoAgua == null)
-          {
-              return Problem("Entity set 'Contexto.EntidadesMuestreoAgua'  is null.");
-          }
-            _context.EntidadesMuestreoAgua.Add(entidadesMuestreoAgua);
+            if (!EntidadesMuestreoAguaExists(entidadesMuestreoAgua.EntidadesMuestreoAguaId))
+                _context.EntidadesMuestreoAguas.Add(entidadesMuestreoAgua);
+            else
+                _context.EntidadesMuestreoAguas.Update(entidadesMuestreoAgua);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetEntidadesMuestreoAgua", new { id = entidadesMuestreoAgua.EntidadesMuestreoAguaId }, entidadesMuestreoAgua);
+            return Ok(entidadesMuestreoAgua);
         }
 
         // DELETE: api/EntidadesMuestreoAguas/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEntidadesMuestreoAgua(int id)
         {
-            if (_context.EntidadesMuestreoAgua == null)
+            if (_context.EntidadesMuestreoAguas == null)
             {
                 return NotFound();
             }
-            var entidadesMuestreoAgua = await _context.EntidadesMuestreoAgua.FindAsync(id);
+            var entidadesMuestreoAgua = await _context.EntidadesMuestreoAguas.FindAsync(id);
             if (entidadesMuestreoAgua == null)
             {
                 return NotFound();
             }
 
-            _context.EntidadesMuestreoAgua.Remove(entidadesMuestreoAgua);
+            _context.EntidadesMuestreoAguas.Remove(entidadesMuestreoAgua);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -118,7 +119,7 @@ namespace AguaMariaSolution.Server.Controllers
 
         private bool EntidadesMuestreoAguaExists(int id)
         {
-            return (_context.EntidadesMuestreoAgua?.Any(e => e.EntidadesMuestreoAguaId == id)).GetValueOrDefault();
+            return (_context.EntidadesMuestreoAguas?.Any(e => e.EntidadesMuestreoAguaId == id)).GetValueOrDefault();
         }
     }
 }
