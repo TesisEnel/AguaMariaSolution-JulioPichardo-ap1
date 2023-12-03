@@ -10,6 +10,7 @@ namespace AguaMariaSolutionsDoNet8.Data
         public DbSet<Empleados> Empleados { get; set; }
         public DbSet<Clientes> Clientes { get; set; }
         public DbSet<Reviews> Reviews { get; set; }
+        public DbSet<Productos> Productos { get; set; }
         public DbSet<RecordLavadoraBotellones> RecordLavadoraBotellones { get; set; }
         public DbSet<ControlCalidadProductoTerminado> ControlCalidadProductoTerminado { get; set; }
         public DbSet<ProductoTerminadosDetalle> ProductoTerminadosDetalle { get; set; }
@@ -72,6 +73,15 @@ namespace AguaMariaSolutionsDoNet8.Data
             new EntidadesMuestreoAgua() {EntidadesMuestreoAguaId = 5, Descripción = "Filtro Carbón Activado"},
             new EntidadesMuestreoAgua() {EntidadesMuestreoAguaId = 6, Descripción = "Ablandadores"},
             new EntidadesMuestreoAgua() {EntidadesMuestreoAguaId = 7, Descripción = "Ósmosis"},});
+
+
+            modelBuilder.Entity<Productos>().HasData(new List<Productos>()
+            {
+                //Entidades de muestreo de agua
+            new Productos() {ProductoId = 1, Nombre = "Botella de Agua"},
+            new Productos() {ProductoId = 2, Nombre = "5 Galones de Agua"},
+            new Productos() {ProductoId = 3, Nombre = "1 Galon de Agua"},
+            new Productos() {ProductoId = 4, Nombre = "Litro y Medio de Agua"},});
         }
 
         public DbSet<EntidadesMuestreoAgua> EntidadesMuestreoAgua { get; set; } = default!;

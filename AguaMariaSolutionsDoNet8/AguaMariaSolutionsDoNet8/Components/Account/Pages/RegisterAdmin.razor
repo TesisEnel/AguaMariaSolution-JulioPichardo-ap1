@@ -1,10 +1,9 @@
-﻿@page "/Account/Register/Empleados"
+﻿@page "/Account/Register/Admin"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
 @using AguaMariaSolutionsDoNet8.Shared.Models
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using AguaMariaSolutionsDoNet8.Data
@@ -18,14 +17,10 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject ApplicationDbContext DbContext
-@attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Register</PageTitle>
 
-<div class="card-header d-flex align-items-center">
-    <img src="AguaMariaLogo.png" class="img-logo" />
-    <h1>Registro de Empleados</h1>
-</div>
+<h1>Registro de Empleados</h1>
 
 <div class="row">
     <div class="col-md-4">
@@ -66,7 +61,7 @@
                 <ValidationMessage For="() => Input.Dirección" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Teléfono" class="form-control" aria-required="true" placeholder="8098457812"/>
+                <InputText @bind-Value="Input.Teléfono" class="form-control" aria-required="true" placeholder="8098457812" />
                 <label>Phone</label>
                 <ValidationMessage For="() => Input.Teléfono" class="text-danger" />
             </div>
@@ -129,10 +124,10 @@
             };
 
         // Agregar el nuevo empleado a la base de datos
-        DbContext.Empleados.Add(nuevoEmpleado);      
+        DbContext.Empleados.Add(nuevoEmpleado);
         await DbContext.SaveChangesAsync();
 
-// Buscar el rol "Empleado"
+        // Buscar el rol "Empleado"
 
         var roleName = "Empleado";
         var role = await DbContext.Roles
