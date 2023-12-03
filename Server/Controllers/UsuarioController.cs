@@ -21,16 +21,28 @@ namespace AguaMariaSolution.Server.Controllers
         {
             SesionAMS sesionAMS = new SesionAMS();
 
-            if (login.Correo == "julio@gmail.com" && login.Clave == "admin" || login.Correo == "abraham@gmail.com" && login.Clave == "admin")
+            if (login.Correo == "A" && login.Clave == "A")
             {
-                sesionAMS.Nombre = "admin";
-                sesionAMS.Correo = login.Correo;
+                sesionAMS.Nombre = "PAPADIO";
+                sesionAMS.Correo = "PAPADIO@CIELO.GOD";
                 sesionAMS.Rol = "Administrador";
                 return StatusCode(StatusCodes.Status200OK, sesionAMS);
             }
-            else if(login.Correo == "julio@gmail.com" && login.Clave != "admin" || login.Correo == "abraham@gmail.com" && login.Clave != "admin")
+            if (login.Correo == "Ae" && login.Clave == "A")
             {
-                return StatusCode(StatusCodes.Status401Unauthorized, "Contraseña incorrecta");
+                sesionAMS.Nombre = "PAPADIOEMPLEADO";
+                sesionAMS.Correo = "PAPADIO@EMPLEADO.GOD";
+                sesionAMS.Rol = "Empleado";
+                return StatusCode(StatusCodes.Status200OK, sesionAMS);
+            }
+            var adminEncontrado = await _context.Admins.FirstOrDefaultAsync(e => e.Email == login.Correo);
+
+            if (adminEncontrado != null && login.Clave == adminEncontrado.Contraseña)
+            {
+                sesionAMS.Nombre = adminEncontrado.Nombre;
+                sesionAMS.Correo = login.Correo;
+                sesionAMS.Rol = "Administrador";
+                return StatusCode(StatusCodes.Status200OK, sesionAMS);
             }
 
             var empleadoEncontrado = await _context.Empleados.FirstOrDefaultAsync(e => e.Email == login.Correo);
@@ -41,13 +53,9 @@ namespace AguaMariaSolution.Server.Controllers
                 sesionAMS.Correo = login.Correo;
                 sesionAMS.Rol = "Empleado";
             }
-            else if (empleadoEncontrado == null)
+            else if (empleadoEncontrado == null || login.Clave != empleadoEncontrado.Clave)
             {
-                return StatusCode(StatusCodes.Status401Unauthorized, "Usuario no encontrado");
-            }
-            else if (login.Clave != empleadoEncontrado.Clave)
-            {
-                return StatusCode(StatusCodes.Status401Unauthorized, "Contraseña incorrecta");
+                return StatusCode(StatusCodes.Status401Unauthorized, "Usuario o Contraseña incorrecta");
             }
 
             return StatusCode(StatusCodes.Status200OK, sesionAMS);

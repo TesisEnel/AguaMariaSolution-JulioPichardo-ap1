@@ -43,12 +43,15 @@
                         <option value="" hidden="hidden">Seleccione</option>
                         @foreach (var p in ListaParametros)
                         {
-                            if (p.ParametroId >= 1 && p.ParametroId <= 14)
+                            if(p == null)
+                            {
+                                break;
+                            }
+                            if (p.ParametroId >= 1 && p.ParametroId <= 100)
                             {
                                 <option value="@p.ParametroId">@p.Descripción</option>
                             }
-                            if (p.ParametroId == 15)
-                                break;
+
                         }
                     </InputSelect>
                     <ValidationMessage For="@(() => Detalles.ParametroId)" />

@@ -1,0 +1,67 @@
+﻿@page "/a"
+@inject HttpClient httpClient
+
+<button @onclick="Hola">Prueba</button>
+
+@code {
+    public List<Parametros>? Parametros { get; set; }
+    public EntidadesMuestreoAguas entidadesMuestreoAgua { get; set; } = new EntidadesMuestreoAguas();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Parametros = await httpClient.GetFromJsonAsync<List<Parametros>>($"api/Parametros");
+    }
+
+    public async Task Guardar()
+    {
+        if (false)
+        {
+            return;
+        }
+        using var response = await httpClient.PostAsJsonAsync("api/EntidadesMuestreoAguas", entidadesMuestreoAgua);
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Error al guardar");
+            return;
+        }
+        var EntidadesDevuelta = await response.Content.ReadFromJsonAsync<EntidadesMuestreoAguas>();
+        if (EntidadesDevuelta is not null)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Guardado exitosamente",
+                    Detail = "Su registro ha sido guardada con éxito.",
+                    Duration = 4000
+                };
+            Console.WriteLine("guardado");
+            StateHasChanged();
+        }
+    }
+
+    public async Task Hola()
+    {
+        var ParametrosEntidadesMuestreoAguas = await httpClient.GetFromJsonAsync<List<ParametrosEntidadesMuestreoAguas>>("api/ParametrosEntidadesMuestreoAguas");
+        var entidadesMuestreoAguas = await httpClient.GetFromJsonAsync<List<EntidadesMuestreoAguas>>("api/EntidadesMuestreoAguas");
+        foreach (var entidad in entidadesMuestreoAguas)
+        {
+            entidadesMuestreoAgua = entidad;
+            foreach (var pe in ParametrosEntidadesMuestreoAguas)
+            {
+                // Verificar si el Id de ParametrosEntidadesMuestreoAguas es igual al EntidadesMuestreoAguaId
+                if (pe.EntidadesMuestreoAguaId == entidad.EntidadesMuestreoAguaId)
+                {
+                    // Agregar el parámetro a la lista de la entidad
+                    entidadesMuestreoAgua.ListaParametros.Add(pe);
+                }
+            }
+            await Guardar();
+        }
+    }
+
+    public async void Hola2()
+    {
+        using var response = await httpClient.DeleteAsync($"api/EntidadesMuestreoAgua/{1}");
+    
+    }
+}
