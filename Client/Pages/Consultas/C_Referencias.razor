@@ -1,0 +1,150 @@
+﻿@page "/Consultas/Referencias"
+@inject HttpClient httpClient
+@inject NotificationService notificationService
+@attribute [Authorize(Roles = "Administrador, Empleado")]
+
+<PageTitle>consulta de Referencias</PageTitle>
+
+    <div class="card-header"><h3 class="text-center">Buscar Referencias</h3></div>
+<fieldset class="border-secondary border border-1">
+    <div class="card-body row">
+        <div class="row">
+            <h5 class="text-center">Por Referencia</h5>
+            <div class="col-md-6">
+                <label>Filtrar por ID:</label>
+                <InputNumber @bind-Value="FiltroVR" class="form-control"></InputNumber>
+            </div>
+            <div class="col-md-6">
+                <label>Filtrar por Descripción:</label>
+                <InputText @bind-Value="DescripciónVR" class="form-control"></InputText>
+            </div>
+            <br /><br /><br />
+            <hr />
+            <h5 class="text-center">Por Par&aacute;metro</h5>
+            <div class="col-md-6">
+                <label>Filtrar por ID:</label>
+                <InputNumber @bind-Value="FiltroP" class="form-control"></InputNumber>
+            </div>
+            <div class="col-md-6">
+                <label>Filtrar por Descripción:</label>
+                <InputText @bind-Value="DescripciónP" class="form-control"></InputText>
+            </div>
+            <br />
+            <br />
+            <br />
+            <div class="row">
+                <button type="button" class="btn btn-outline-primary oi oi-magnifying-glass" @onclick="Buscar"></button>
+            </div>
+        </div>
+    </div>
+
+    @if (ListaReferencias is not null)
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Referencia Id</th>
+                        <th>Par&aacute;metro Id</th>
+                        <th>Par&aacute;metro</th>
+                        <th>Descripci&oacute;n</th>
+                        <AuthorizeView Roles="Administrador" Context="Admin">
+                            <th>Ver</th>
+                        </AuthorizeView>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(ListaReferencias.Count != 0)
+                    {
+                        @foreach (var Referencias in ListaReferencias)
+                        {
+                            <tr>
+                                <td>@Referencias.ReferenciaId</td>
+                                <td>@Referencias.ParametroId</td>
+                                <td>@ObtenerDescripción(Referencias.ParametroId)</td>
+                                <td>@Referencias.Descripción</td>
+                                <AuthorizeView Roles="Administrador" Context="Admin">
+                                    <Authorized>
+                                        <td><a href="/Registros/Referencias/@Referencias.ReferenciaId"><i class="oi oi-eye"></i></a></td>
+                                    </Authorized>
+                                </AuthorizeView>
+                            </tr>
+                        }
+                    }
+                    
+                </tbody>
+            </table>
+        </div>
+    }
+</fieldset>
+
+
+@code {
+
+    public List<Referencias> ListaReferencias { get; set; } = new List<Referencias>();
+    public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
+    public int FiltroVR { get; set; }
+    public string DescripciónVR { get; set; } = "";
+    public int FiltroP { get; set; }
+    public string DescripciónP { get; set; } = "";
+    public bool PrimeraEntrada = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Buscar();
+        PrimeraEntrada = false;
+    }
+
+    public string ObtenerDescripción(int Id)
+    {
+        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Descripción!;
+    }
+
+    public async Task Buscar()
+    {
+
+        List<Parametros> ListaParametrosCompleta = new List<Parametros>();
+        List<Referencias> ListaReferenciasCompleta = new List<Referencias>();
+
+        try
+        {
+                ListaParametrosCompleta = await httpClient.GetFromJsonAsync<List<Parametros>>("api/Parametros");
+                ListaReferenciasCompleta = await httpClient.GetFromJsonAsync<List<Referencias>>("api/Referencias");
+        }
+        catch
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "No se ha encontrado.",
+                    Detail = "No se encontraron valores Referenciales o parametros.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
+        if (PrimeraEntrada)
+        {
+            ListaParametros = new List<Parametros>(ListaParametrosCompleta);
+            ListaReferencias = new List<Referencias>(ListaReferenciasCompleta);
+            return;
+        }
+
+        ListaParametros = ListaParametrosCompleta.Where(p => (FiltroP == 0 || p.ParametroId == FiltroP) 
+                        && (string.IsNullOrEmpty(DescripciónP) 
+                        || (p.Descripción != null && p.Descripción.ToLower().Contains(DescripciónP.ToLower()))))
+                                                                .ToList();
+
+        var ListaId = ListaParametros.Select(p => p.ParametroId).ToList();
+
+        ListaReferencias = ListaReferenciasCompleta.Where(p => (FiltroVR == 0 || p.ReferenciaId == FiltroVR)
+                                                                        && (string.IsNullOrEmpty(DescripciónVR) 
+                                                                        || (p.Descripción != null && p.Descripción.ToLower().Contains(DescripciónVR.ToLower())))
+                                                                        && ListaId.Contains(p.ParametroId))
+                                                                        .ToList();
+
+        StateHasChanged();
+    }
+
+}
