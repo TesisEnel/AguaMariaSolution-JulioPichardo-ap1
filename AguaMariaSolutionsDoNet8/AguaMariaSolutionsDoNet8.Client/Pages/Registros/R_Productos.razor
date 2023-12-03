@@ -1,0 +1,182 @@
+﻿@page "/RegistroProducto"
+@page "/RegistroProducto/{ProductoId:int}"
+@inject NotificationService notificationService
+@inject HttpClient httpClient
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveAuto
+<RadzenNotification />
+
+<EditForm Model="productos" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="row">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h1>Productos</h1>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <label>ID:</label>
+                        <div class="input-group">
+                            <InputNumber @bind-Value="productos.ProductoId" class="id-input"></InputNumber>
+                            <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                        </div>
+                        <div class="col">
+                            <label>Nombre: </label>
+                            <InputText @bind-Value="productos.Nombre" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => productos.Nombre)" />
+                        </div>
+                    </div>
+                    <div class="col">
+
+                        <label class="form-label" for="Foto"><i class="oi oi-puzzle-piece" /> Foto:</label>
+                        <InputFile OnChange="CargarImagen" class="form-control" accept=".png, .jpg, .jpeg" />
+                        <ValidationMessage For="@(() => productos.Imagen)" />
+                        @if (productos.Imagen != null)
+                        {
+                            var base64 = Convert.ToBase64String(productos.Imagen);
+                            var imgSrc = $"data:image/jpeg;base64,{base64}";
+                            <img src="@imgSrc" alt="Imagen de la película" class="img-fluid" style="width: 300px; height: 315px; margin-right: 20px;" />
+                        }
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="text-center">
+                        <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+                        <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+                        <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int ProductoId { get; set; }
+    public Productos productos { get; set; } = new Productos(); //Perner la entidad en plural
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ProductoId > 0)
+        {
+            productos.ProductoId = ProductoId;
+            await Buscar();
+        }
+        StateHasChanged();
+    }
+
+    public async Task Guardar()
+    {
+        using var response = await httpClient.PostAsJsonAsync("api/Productos", productos);
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error ",
+                    Detail = "Producto no guardado",
+                    Duration = 5_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        var productosDevuelto = await response.Content.ReadFromJsonAsync<Productos>();
+        if (productosDevuelto is not null)
+        {
+            productos = productosDevuelto;
+            StateHasChanged();
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Guardado ",
+                    Detail = "Menú guardado",
+                    Duration = 5_000
+                };
+            notificationService.Notify(mensaje);
+            Nuevo();
+        }
+    }
+
+    public void Nuevo()
+    {
+        productos = new Productos();
+    }
+
+    public async Task Buscar()
+    {
+        var productoNoNulo = (await httpClient.GetFromJsonAsync<List<Productos>>($"api/Productos"))!
+        .ToList().Any(e => e.ProductoId == productos.ProductoId);
+        if (productoNoNulo)
+        {
+            var productoEncontrado = await httpClient.GetFromJsonAsync<Productos>($"api/Productos/{productos.ProductoId}");
+            if (productoEncontrado != null)
+            {
+                productos = productoEncontrado;
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Producto no encontrado",
+                    Duration = 5_000
+                };
+            notificationService.Notify(mensaje);
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/Productos/{productos.ProductoId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Eliminado ",
+                    Detail = "No haz podido eliminar el Producto",
+                    Duration = 5_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Éxito",
+                    Detail = "Producto Eliminado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+        }
+        Nuevo();
+    }
+
+    private async Task<Productos> BuscarMenu(int entradasId)
+    {
+        Productos Productos = new();
+        var entradasEncontrada = await httpClient.GetFromJsonAsync<Productos>($"api/Productos/{entradasId}");
+
+        if (entradasEncontrada != null)
+            return Productos = entradasEncontrada;
+
+        return new Productos();
+    }
+
+    private async Task CargarImagen(InputFileChangeEventArgs e)
+    {
+        var archivo = e.File;
+        var buffer = new byte[archivo.Size];
+
+        await archivo.OpenReadStream().ReadAsync(buffer);
+        productos.Imagen = buffer;
+    }
+}

@@ -14,6 +14,8 @@ namespace AguaMariaSolutionsDoNet8.Shared.Models
 
         public int ClienteId { get; set; }
 
+        public int ProductoId { get; set; }
+
         [Required(ErrorMessage = "Por favor ingrese un comentario")]
         public string? Comentario { get; set; }
 

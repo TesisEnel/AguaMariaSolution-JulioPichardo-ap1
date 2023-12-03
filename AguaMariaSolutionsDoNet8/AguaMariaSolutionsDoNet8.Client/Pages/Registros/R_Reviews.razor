@@ -1,4 +1,5 @@
 ﻿@page "/ReviewsAguaMaria";
+@page "/ReviewsAguaMaria/{ProductoId:int}";
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
 @rendermode InteractiveAuto
@@ -55,6 +56,19 @@
                     <InputNumber @bind-Value="reviews.Valoración" class="form-control" min="1" max="10"></InputNumber>
                     <ValidationMessage For="@(() => reviews.Valoración)" />
                 </div>
+                <div class="col-md-6">
+                    <label>Producto:</label>
+                    <InputSelect disabled @bind-Value="reviews.ProductoId" class="form-select">
+                        @foreach (var p in ListaProductos)
+                        {
+                            if (p != null)
+                            {
+                                <option value="@p.ProductoId">@p.Nombre</option>
+                            }
+                        }
+
+                    </InputSelect>
+                </div>
                 <div class="col-md-5">
                     <label>Fecha del botellon</label>
                     <InputDate @bind-Value="reviews.FechaDeBotellon" class="form-control"></InputDate>
@@ -77,17 +91,33 @@
 @code
 {
     [Parameter]
+    public int ProductoId { get; set; }
 
+    [Parameter]
     public int ReviewId { get; set; }
+
+
 
     public Reviews reviews { get; set; } = new Reviews();
     public Clientes clientes { get; set; } = new Clientes();
+    public List<Productos> ListaProductos { get; set; } = new List<Productos>();
 
     public bool ExisteCliente { get; set; } = true;
     string HoraFormato = "HH:mm:ss";
 
     protected override async Task OnInitializedAsync()
     {
+        var productos = await httpClient.GetFromJsonAsync<List<Productos>>("api/Productos");
+
+        if (productos is not null)
+        {
+            ListaProductos = productos;
+        }
+        if (ProductoId > 0)
+        {
+            this.reviews.ProductoId = ProductoId;
+            await Buscar();
+        }
         if (ReviewId > 0)
         {
             this.reviews.ReviewId = ReviewId;
@@ -95,7 +125,7 @@
         }
         else
         {
-            Nuevo();
+
         }
     }
 
@@ -112,18 +142,6 @@
                 this.reviews = clienteEncontrado;
                 StateHasChanged();
             }
-        }
-        else
-        {
-            var mensaje = new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = "Error",
-                    Detail = "No se encontro ningun cliente",
-                    Duration = 4_000
-                };
-            notificationService.Notify(mensaje);
-            return;
         }
     }
 
@@ -291,5 +309,11 @@
                 };
             notificationService.Notify(mensaje);
         }
+    }
+
+    public string ObtenerNombre(int Id)
+    {
+        var empleado = ListaProductos.FirstOrDefault(p => p.ProductoId == Id);
+        return empleado?.Nombre ?? "Nombre no encontrado";
     }
 }
