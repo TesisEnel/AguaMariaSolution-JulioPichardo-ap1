@@ -4,14 +4,12 @@
 @inject NotificationService notificationService
 @inject NavigationManager NavigationManager
 
-@attribute [Authorize]
-
 <div>
     <div class="row justify-content-start ">
         <div class="col-sm-10 col-md-9 col-lg-10 col-xl-xxl-7">
             <div class="card">
                 <div class="card-header">
-                    <h1>Consulta Menú</h1>
+                    <h1>Consulta Producto</h1>
                     <div class="row">
                         <label>Filtrar por</label>
                         <div class="col">
@@ -61,21 +59,24 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <h2>@productos.Nombre</h2>
-                                                <strong> Nota promedio: </strong>
+                                                <strong>Valoraci&oacute;n: </strong>
                                                 @for (int i = 0; i < 5; i++)
                                                 {
                                                     double valoracionPromedio = productos.Reviews.Any() ? productos.Reviews.Average(r => r.Valoración) : 0;
                                                     <i class="@(i < (valoracionPromedio/2) ? "bi bi-star-fill" : "bi bi-star")"></i>
                                                 }
                                                 <br />
-                                                @* <button class="btn btn-primary" href="RegistroComida/@tabla.ComidaId">Editar</button> *@
-                                                <button type="button" @onclick="(() => Registrar(productos.ProductoId))" class="btn btn-primary">Editar</button>
-                                                <button type="button" @onclick="(() => Valorar(productos.ProductoId))" class="btn btn-success">Valorar</button>
-                                                @* <a href="/RegistroMenu/@Productos.MenuId"><button type="button" class="btn btn-primary"><i class="oi oi-plus"> Editar</i></button></a>
-                                        <a href="/Comentarios/@Productos.MenuId"><button type="button" class="btn btn-warning"><i class="oi oi-plus"> Comentar</i></button></a> *@
-
-
-
+                                                <AuthorizeView Roles="Admin">
+                                                    <Authorized>
+                                                        <button type="button" @onclick="(() => Registrar(productos.ProductoId))" class="btn btn-primary">Editar</button>
+                                                        <button type="button" @onclick="(() => ValorarAdmin(productos.ProductoId))" class="btn btn-success">Valorar</button>
+                                                    </Authorized>
+                                                </AuthorizeView>
+                                                <AuthorizeView>
+                                                    <NotAuthorized>
+                                                        <button type="button" @onclick="(() => Valorar(productos.ProductoId))" class="btn btn-success">Valorar</button>
+                                                    </NotAuthorized>
+                                                </AuthorizeView>
                                             </div>
                                         </div>
                                         <div class="row mt-5">
@@ -117,9 +118,9 @@
         else
         if (Filtro == 1 && !string.IsNullOrEmpty(productos!.Nombre))
         {
-            var AcciónTomadaBusqueda = productos!.Nombre.ToLower();
+            var NombreBusqueda = productos!.Nombre.ToLower();
             ListaProductos = (await httpClient.GetFromJsonAsync<List<Productos>>($"api/Productos"))!
-                .Where(t => t.Nombre != null && t.Nombre.ToLower().Contains(AcciónTomadaBusqueda))
+                .Where(t => t.Nombre != null && t.Nombre.ToLower().Contains(NombreBusqueda))
                 .ToList();
             StateHasChanged();
         }
@@ -134,8 +135,12 @@
     {
         NavigationManager.NavigateTo($"/ReviewsAguaMaria/{productoId}");
     }
-    public void Registrar(int menuId)
+    public void ValorarAdmin(int productoId)
     {
-        NavigationManager.NavigateTo($"/RegistroProducto/{menuId}");
+        NavigationManager.NavigateTo($"/ReviewsAguaMariaAdmin/Producto/{productoId}");
+    }
+    public void Registrar(int productoId)
+    {
+        NavigationManager.NavigateTo($"/RegistroProducto/{productoId}");
     }
 }

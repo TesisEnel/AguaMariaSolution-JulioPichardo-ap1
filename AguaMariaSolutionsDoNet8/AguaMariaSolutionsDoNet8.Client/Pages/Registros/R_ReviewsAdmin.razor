@@ -1,8 +1,11 @@
-﻿@page "/ReviewsAguaMaria";
-@page "/ReviewsAguaMaria/{ProductoId:int}";
+﻿@page "/ReviewsAguaMariaAdmin";
+@page "/ReviewsAguaMariaAdmin/Producto/{ProductoId:int}"
+@page "/ReviewsAguaMariaAdmin/Review/{ReviewId:int}"
+
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
 @inject NavigationManager navManager
+@attribute [Authorize(Roles = "Admin")]
 
 @rendermode InteractiveAuto
 <RadzenNotification />
@@ -73,12 +76,6 @@
                             </InputSelect>
                         </Authorized>
                     </AuthorizeView>
-                    <AuthorizeView Context="Cliente">
-                        <NotAuthorized>
-                                 <h6>@ObtenerNombre(ProductoId)</h6>          
-                       </NotAuthorized>
-                    </AuthorizeView>
-                    
                 </div>
                 <div class="col-md-5">
                     <label>Fecha del botellon</label>
@@ -94,6 +91,7 @@
         </div>
         <div class="card-footer text-center">
             <button class="btn btn-success">Enviar</button>
+            <button class="btn btn-danger" @onclick="Eliminar">Eliminar</button>
         </div>
     </div>
 </EditForm>
@@ -102,12 +100,9 @@
 @code
 {
     [Parameter]
-    public int ProductoId { get; set; }
-
-    [Parameter]
     public int ReviewId { get; set; }
-
-
+    [Parameter]
+    public int ProductoId { get; set; }
 
     public Reviews reviews { get; set; } = new Reviews();
     public Clientes clientes { get; set; } = new Clientes();
@@ -124,11 +119,7 @@
         {
             ListaProductos = productos;
         }
-        if(ProductoId == 0)
-        {
-            navManager.NavigateTo("/ConsultaProducto",true);
-        }
-        if (ProductoId > 0)
+        if(ProductoId > 0)
         {
             this.reviews.ProductoId = ProductoId;
             await Buscar();
@@ -137,10 +128,6 @@
         {
             this.reviews.ReviewId = ReviewId;
             await Buscar();
-        }
-        else
-        {
-
         }
     }
 
@@ -259,6 +246,36 @@
         reviews.Valoración = 5;
     }
 
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/Reviews/{reviews.ReviewId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Eliminar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Éxito",
+                    Detail = "Review Eliminada Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+
+        }
+        Nuevo();
+    }
+
     public async Task ObtenerOCrearCliente()
     {
 
@@ -298,7 +315,7 @@
 
     public string ObtenerNombre(int Id)
     {
-        var producto = ListaProductos.FirstOrDefault(p => p.ProductoId == Id);
-        return producto?.Nombre ?? "Cargando...";
+        var empleado = ListaProductos.FirstOrDefault(p => p.ProductoId == Id);
+        return empleado?.Nombre ?? "Cargando...";
     }
 }
