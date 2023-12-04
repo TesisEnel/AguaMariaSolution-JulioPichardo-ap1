@@ -1,0 +1,209 @@
+﻿@page "/Registros/Parametros";
+@page "/Registros/Parametros/{ParametroId:int}";
+@inject HttpClient httpClient
+@inject NotificationService notificationService;
+@rendermode InteractiveAuto
+<RadzenNotification/>
+@attribute [Authorize(Roles = "Admin")]
+
+<EditForm Model="Parametro" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header d-flex align-items-center">
+            <img src="AguaMariaLogo.png" class="img-logo" />
+            <h1>Registro de Par&aacute;metros</h1>
+        </div>
+        <div class="card-body">
+            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
+                <label>Par&aacute;metro Id</label>
+                <div class="input-group mb-3">
+                    <InputNumber @bind-Value="Parametro.ParametroId" class="form-control" aria-describedby="BotonBuscar" />
+                    <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="bi bi-search" /></button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Descripci&oacute;n:</label>
+                    <InputText @bind-Value="Parametro.Descripción" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => Parametro.Descripción)" />
+                </div>
+                <div class="col-md-6">
+                    <label>M&iacute;nimo:</label>
+                    <InputNumber @bind-Value="Parametro.Mínimo" class="form-control"></InputNumber>
+                    <ValidationMessage For="@(() => Parametro.Mínimo)" />
+                </div>
+                <div class="col-md-6">
+                    <label>M&aacute;ximo:</label>
+                    <InputNumber type="email" @bind-Value="Parametro.Máximo" class="form-control"></InputNumber>
+                    <ValidationMessage For="@(() => Parametro.Máximo)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="bi bi-trash-fill" /></button>
+        </div>
+    </div>
+</EditForm>
+
+
+@code
+{
+    [Parameter]
+
+    public int ParametroId { get; set; }
+
+    public Parametros Parametro { get; set; } = new Parametros();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ParametroId > 0)
+        {
+            this.Parametro.ParametroId = ParametroId;
+            await Buscar();
+        }
+    }
+
+    public async Task Buscar()
+    {
+        try
+        {
+            await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{Parametro.ParametroId}");
+        }
+        catch
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "No se ha encontrado.",
+                    Detail = "No se encontró un parámetro con el ID que estás buscando.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            this.Nuevo();
+            return;
+        }
+        var ParametroEncontrado = await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{Parametro.ParametroId}");
+        if (ParametroEncontrado != null)
+        {
+            this.Parametro = ParametroEncontrado;
+            StateHasChanged();
+        }
+    }
+
+    public bool ValidarGuardar()
+    {
+        if (string.IsNullOrEmpty(Parametro.Descripción))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "La descripción no puede estar vacía",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        if (Parametro.Mínimo > Parametro.Máximo)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "El valor mínimo no puede ser mayor al valor máximo",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        if (Parametro.Mínimo < 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "El valor mínimo no puede ser menor a 0",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        return true;
+
+    }
+
+    public async Task Guardar()
+    {
+        if (!ValidarGuardar())
+        {
+            return;    
+        }
+        using var response = await httpClient.PostAsJsonAsync("api/Parametros", Parametro);
+        if (!response.IsSuccessStatusCode)
+        {
+            {
+                var mensaje = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = $"Error: {response.StatusCode} - {response.Content}",
+                        Duration = 4_000
+                    };
+                notificationService.Notify(mensaje);
+                return;
+            }
+        }
+        var ParametroDevuelto = await response.Content.ReadFromJsonAsync<Parametros>();
+        if (ParametroDevuelto is not null)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Parámetro Guardado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            Parametro = ParametroDevuelto;
+            this.Nuevo();
+            StateHasChanged();
+        }
+    }
+
+    public void Nuevo()
+    {
+        this.Parametro = new Parametros();
+    }
+
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/Parametros/{Parametro.ParametroId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Eliminar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Pará  metro Eliminado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+
+        }
+        Nuevo();
+    }
+}

@@ -77,8 +77,8 @@
                                 <InputNumber @bind-Value="Detalles.Valor" class="form-control col-1"></InputNumber>
                                 break;
                         }
-                        <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="oi oi-plus" />Add </button>
-                        <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="oi oi-reload" /> </button>
+                        <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="bi bi-plus-lg" />Add </button>
+                        <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="bi bi-arrow-clockwise" /> </button>
                     </div>
                 </div>
                 @if (Detalles.ParametroId != 0)
@@ -119,7 +119,7 @@
                         <td>@ObtenerMáximo(detalle.ParametroId)</td>
                         <td>@detalle.Valor</td>
                         <td>@detalle.Pasó</td>
-                        <td><button type="button" class="btn btn-danger oi oi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+                        <td><button type="button" class="btn btn-danger bi bi-trash-fill" @onclick=@(() => RemoverDetalle(detalle))></button></td>
                     </tr>
                 }
             </tbody>

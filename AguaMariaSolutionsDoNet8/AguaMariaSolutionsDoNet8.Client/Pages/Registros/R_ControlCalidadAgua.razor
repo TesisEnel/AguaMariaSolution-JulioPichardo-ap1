@@ -138,8 +138,8 @@
                                     break;
                             }
                             
-                            <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="oi oi-plus" />Add </button>
-                            <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="oi oi-reload" /> </button>
+                            <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="bi bi-plus-lg" />Add </button>
+                            <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="bi bi-arrow-clockwise" /> </button>
                         </div>
                     </div>
                 </div>
@@ -181,7 +181,7 @@
                             <td>@ObtenerMáximo(detalle.ParametroId)</td>
                             <td>@detalle.Valor</td>
                             <td>@detalle.Pasó</td>
-                            <td><button type="button" class="btn btn-danger oi oi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+                            <td><button type="button" class="btn btn-danger bi bi-trash-fill" @onclick=@(() => RemoverDetalle(detalle))></button></td>
                         </tr>
                     }
                 </tbody>
@@ -214,7 +214,7 @@
     public ControlCalidadAgua controlCalidadAgua { get; set; } = new ControlCalidadAgua();
 
     public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
-    public List<EntidadesMuestreoAgua> ListaEntidades { get; set; } = new List<EntidadesMuestreoAgua>();
+    public List<EntidadesMuestreoAguas> ListaEntidades { get; set; } = new List<EntidadesMuestreoAguas>();
     public List<ControlCalidadAguaDetalle> DetallesRemovidos { get; set; } = new List<ControlCalidadAguaDetalle>();
 
     public int ParametroSeleccionado;
@@ -556,7 +556,7 @@
 
     private async Task CargarEntidades()
     {
-        var encontrados = await httpClient.GetFromJsonAsync<List<EntidadesMuestreoAgua>>("api/EntidadesMuestreoAguas");
+        var encontrados = await httpClient.GetFromJsonAsync<List<EntidadesMuestreoAguas>>("api/EntidadesMuestreoAguas");
         if (encontrados != null)
             ListaEntidades = encontrados;
     }

@@ -1,0 +1,168 @@
+﻿@page "/Registros/Admins";
+@page "/Registros/Admins/{AdminId:int}";
+@inject HttpClient httpClient
+@inject NotificationService notificationService;
+<RadzenNotification/>
+@rendermode InteractiveAuto
+
+<EditForm Model="admins" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header d-flex align-items-center">
+            <img src="AguaMariaLogo.png" class="img-logo" />
+            <h1>Registro de Admins</h1>          
+        </div>
+        <div class="card-body">
+
+            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
+                <label>Id</label>
+                <div class="input-group mb-3">
+                    <InputNumber @bind-Value="admins.AdminId" class="form-control" aria-describedby="BotonBuscar" />
+                    <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Nombre:</label>
+                    <InputText @bind-Value="admins.Nombre" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => admins.Nombre)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Apellido:</label>
+                    <InputText @bind-Value="admins.Apellido" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => admins.Apellido)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Email:</label>
+                    <InputText type="email" @bind-Value="admins.Email" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => admins.Email)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Contraseña:</label>
+                    <InputText @bind-Value="admins.Contraseña" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => admins.Contraseña)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+        </div>
+    </div>
+</EditForm>
+
+
+@code
+{
+    [Parameter]
+
+    public int AdminId { get; set; }
+
+    public Admins admins { get; set; } = new Admins();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AdminId > 0)
+        {
+            this.admins.AdminId = AdminId;
+            await Buscar();
+        }
+    }
+
+    public async Task Buscar()
+    {
+        try
+        {
+            await httpClient.GetFromJsonAsync<Admins>($"api/Admins/{admins.AdminId}");
+        }
+        catch
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "No se ha encontrado.",
+                    Detail = "No se encontró un admin con el ID que estás buscando.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            this.Nuevo();
+            return;
+        }
+        var adminEncontrado = await httpClient.GetFromJsonAsync<Admins>($"api/Admins/{admins.AdminId}");
+        if (adminEncontrado != null)
+        {
+            this.admins = adminEncontrado;
+            StateHasChanged();
+        }
+    }
+
+    public async Task Guardar()
+    {
+        using var response = await httpClient.PostAsJsonAsync("api/Admins", admins);
+        if (!response.IsSuccessStatusCode)
+        {
+            {
+                var mensaje = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = $"Error: {response.StatusCode} - {response.Content}",
+                        Duration = 4_000
+                    };
+                notificationService.Notify(mensaje);
+                return;
+            }
+        }
+        var adminDevuelto = await response.Content.ReadFromJsonAsync<Admins>();
+        if (adminDevuelto is not null)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Admin Guardado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            admins = adminDevuelto;
+            this.Nuevo();
+            StateHasChanged();
+        }
+    }
+
+    public void Nuevo()
+    {
+        this.admins = new Admins();
+    }
+
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/Admins/{admins.AdminId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Eliminar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Admin Eliminado Correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+
+        }
+        Nuevo();
+    }
+}

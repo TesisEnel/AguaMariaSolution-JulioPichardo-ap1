@@ -1,0 +1,439 @@
+﻿@page "/Registros/EntidadesMuestreoAgua"
+@page "/Registros/EntidadesMuestreoAgua/{EntidadesMuestreoAguaId:int}"
+@inject HttpClient httpClient
+@inject NotificationService notificationService
+@attribute [Authorize(Roles = "Admin")]
+<RadzenNotification/>
+@rendermode InteractiveAuto
+
+<PageTitle>Registro Entidades del Muestreo del Agua</PageTitle>
+
+<EditForm Model="entidadesMuestreoAgua" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header d-flex align-items-center">
+            <img src="AguaMariaLogo.png" class="img-logo" />
+            <h1>Registro Entidades del Muestreo del Agua</h1>
+        </div>
+        <div class="card-body">
+            <div class="row">
+
+                <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
+                    <label>Entidad Id</label>
+                    <div class="input-group mb-3">
+                        <InputNumber @bind-Value="entidadesMuestreoAgua.EntidadesMuestreoAguaId" class="form-control" aria-describedby="BotonBuscar" />
+                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="bi bi-search" /></button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label>Descripci&oacute;n o Nombre de la entidad:</label>
+                    <InputText @bind-Value="entidadesMuestreoAgua.Descripción" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => entidadesMuestreoAgua.Descripción)" />
+                </div>
+            </div>
+        </div>
+
+        @*Detalles:*@
+        <fieldset class="border-secondary border border-1">
+            <h3 class="text-center">Par&aacute;metros</h3>
+            <div class="card-body border border-1">
+                <div class="row">
+                    <div class="col-md-3">
+                        <br />
+                        <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="oi oi-reload" /> </button>
+
+                    </div>
+                </div>
+            </div>
+
+            <table class='table table-responsive table-striped'>
+                <thead>
+                    <tr>
+                        <th>Par&aacute;metro Id</th>
+                        <th>Par&aacute;metro</th>
+                        <th>M&iacute;nimo</th>
+                        <th>M&aacute;ximo</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var detalle in entidadesMuestreoAgua.ListaParametros)
+                    {
+                        <tr>
+                            <td>@detalle.ParametroId</td>
+                            <td>@ObtenerDescripciónParámetro(detalle.ParametroId)</td>
+                            <td>@ObtenerMínimo(detalle.ParametroId)</td>
+                            <td>@ObtenerMáximo(detalle.ParametroId)</td>
+                            <td><button type="button" class="btn btn-danger bi bi-trash-fill" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </fieldset>
+
+        <fieldset class="border-secondary border border-1">
+            <h3 class="text-center">Buscar Par&aacute;metros</h3>
+            <br />
+            <div class="card-header row">
+                <div class="row">
+                
+                    <div class="col-md-6">
+                        <label>Filtrar por ID:</label>
+                        <InputNumber @bind-Value="Filtro" class="form-control"></InputNumber>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Filtrar por Descripción:</label>
+                        <InputText @bind-Value="Descripción" class="form-control"></InputText>
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                    <div class="row">
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="BuscarParametros"></button>
+                    </div>
+                </div>
+            </div>
+
+            @if (ListaParametros is not null)
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Par&aacute;metro Id</th>
+                                <th>Descripci&oacute;n</th>
+                                <th>M&iacute;nimo</th>
+                                <th>M&aacute;ximo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var parametros in ListaParametros)
+                            {
+                                <tr>
+                                    <td>@parametros.ParametroId</td>
+                                    <td>@parametros.Descripción</td>
+                                    <td>@parametros.Mínimo</td>
+                                    <td>@parametros.Máximo</td>
+                                    <td><button type="button" class="btn btn-outline-success bi bi-plus-lg" @onclick=@(() => AgregarDetalle(parametros))></button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </fieldset>
+
+        <div class="card-footer text-center">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="bi bi-file-earmark-diff-fill" /></button>
+            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="bi bi-trash-fill" /></button>
+        </div>
+    </div>
+</EditForm>
+
+@code
+{
+    [Parameter]
+    public int EntidadesMuestreoAguaId { get; set; }
+
+    public EntidadesMuestreoAguas entidadesMuestreoAgua { get; set; } = new EntidadesMuestreoAguas();
+    public List<ParametrosEntidadesMuestreoAguas> DetallesRemovidos { get; set; } = new List<ParametrosEntidadesMuestreoAguas>();
+
+    public List<ParametrosEntidadesMuestreoAguas> ParametrosEntidadesMuestreoAguas { get; set; } = new List<ParametrosEntidadesMuestreoAguas>();
+    public List<EntidadesMuestreoAguas> entidadesMuestreoAguas { get; set; } = new List<EntidadesMuestreoAguas>();
+
+    public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
+    public List<Parametros> ListaParametrosParaVer { get; set; } = new List<Parametros>();
+
+    //Para Consultar los parametros
+    public int Filtro { get; set; }
+    public string Descripción { get; set; } = "";
+    public List<Parametros>? Parametros { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarParametros();
+        await BuscarParametros();
+        if (EntidadesMuestreoAguaId > 0)
+        {
+            this.entidadesMuestreoAgua.EntidadesMuestreoAguaId = EntidadesMuestreoAguaId;
+            await Buscar();
+        }
+
+    }
+
+    public void Nuevo()
+    {
+        this.entidadesMuestreoAgua = new EntidadesMuestreoAguas();
+        DetallesRemovidos = new List<ParametrosEntidadesMuestreoAguas>();
+    }
+
+    public string ObtenerDescripciónParámetro(int Id)
+    {
+        return ListaParametrosParaVer.Where(p => p.ParametroId == Id).FirstOrDefault()!.Descripción!;
+    }
+
+    public float ObtenerMínimo(int Id)
+    {
+        return ListaParametrosParaVer.Where(p => p.ParametroId == Id).FirstOrDefault()!.Mínimo;
+    }
+
+    public float ObtenerMáximo(int Id)
+    {
+        return ListaParametrosParaVer.Where(p => p.ParametroId == Id).FirstOrDefault()!.Máximo;
+    }
+
+    public async Task Buscar()
+    {
+        try
+        {
+            await httpClient.GetFromJsonAsync<EntidadesMuestreoAguas>($"api/EntidadesMuestreoAguas/{entidadesMuestreoAgua.EntidadesMuestreoAguaId}");
+        }
+        catch 
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "No se ha encontrado.",
+                    Detail = "No se encontró una entidad con el criterio que estás buscando.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            this.Nuevo();
+            return;
+        }
+
+        var EntidadesMuestreoAguaEncontrada = await httpClient.GetFromJsonAsync<EntidadesMuestreoAguas>($"api/EntidadesMuestreoAguas/{entidadesMuestreoAgua.EntidadesMuestreoAguaId}");
+        if (EntidadesMuestreoAguaEncontrada != null)
+        {
+            this.entidadesMuestreoAgua = EntidadesMuestreoAguaEncontrada;
+            StateHasChanged();
+        }
+
+    }
+
+
+    public async Task Guardar()
+    {
+        if (!ValidarGuardar())
+        {
+            return;
+        }
+        using var response = await httpClient.PostAsJsonAsync("api/EntidadesMuestreoAguas", entidadesMuestreoAgua);
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se pudo guardar correctamente, verifique los campos.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        var EntidadesDevuelta = await response.Content.ReadFromJsonAsync<EntidadesMuestreoAguas>();
+        if (EntidadesDevuelta is not null)
+        {
+            foreach(var detalle in DetallesRemovidos)
+            {
+                await httpClient.DeleteAsync($"api/ParametrosEntidadesMuestreoAguas/{detalle.Id}");
+            }
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Guardado exitosamente",
+                    Detail = "Su registro ha sido guardada con éxito.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            entidadesMuestreoAgua = EntidadesDevuelta;
+            StateHasChanged();
+            this.Nuevo();
+        }
+    }
+
+    public bool ValidarGuardar()
+    {
+        if (entidadesMuestreoAgua.ListaParametros.Count == 0)
+        {
+            var mensaje = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error",
+                Detail = "No se puede guardar un registro sin parametros.",
+                Duration = 4000
+            };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+
+        if (entidadesMuestreoAgua.ListaParametros.GroupBy(d => d.ParametroId).Any(group => group.Count() > 1))
+        {
+            var mensaje = new NotificationMessage
+                    {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se puede guardar un registro con más de un mismo parametro.",
+                Duration = 4000
+            };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        return true;
+    }
+
+    public async Task Eliminar()
+    {
+        var Detalles = entidadesMuestreoAgua.ListaParametros;
+        using var response = await httpClient.DeleteAsync($"api/EntidadesMuestreoAgua/{entidadesMuestreoAgua.EntidadesMuestreoAguaId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se logro eliminar el registro. Error: " ?? response.ReasonPhrase,
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        else
+        {   
+            foreach (var detalle in Detalles)
+            {
+                await httpClient.DeleteAsync($"api/ParametrosEntidadesMuestreoAgua/{detalle.Id}");
+            }
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Registro eliminado",
+                    Detail = "Se ha eliminado Correctamente.",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+
+        }
+        Nuevo();
+    }
+
+    public bool ValidarDetalle(ParametrosEntidadesMuestreoAguas detalle)
+    {
+        if (entidadesMuestreoAgua.ListaParametros.Any(p => p.ParametroId == detalle.ParametroId))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No puede repetirse los parametros",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        return true;
+    }
+
+    public void AgregarDetalle(Parametros parametro )
+    {
+        var detalle = new ParametrosEntidadesMuestreoAguas
+        {
+                ParametroId = parametro.ParametroId,
+        };
+        if (ValidarDetalle(detalle))
+        {
+            entidadesMuestreoAgua.ListaParametros.Add(detalle);
+            DetallesRemovidos.Remove(detalle);
+            StateHasChanged();
+        }
+    }
+
+    public async Task RemoverDetalle(ParametrosEntidadesMuestreoAguas detalleRemover)
+    {
+        entidadesMuestreoAgua.ListaParametros.Remove(detalleRemover);
+        DetallesRemovidos.Add(detalleRemover);
+        StateHasChanged();
+    }
+
+    public void Deshacer()
+    {
+
+        if (DetallesRemovidos.Count == 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Cuidado",
+                    Detail = "No tiene detalles para deshacer.",
+                    Duration = 7000,
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
+        var detalleDeshacer = DetallesRemovidos.FirstOrDefault();
+
+
+        if (entidadesMuestreoAgua.ListaParametros.Any(d => d.ParametroId == detalleDeshacer.ParametroId))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Cuidado",
+                    Detail = "Ya tiene agregado un detalle con este mismo parámetro, elimine uno antes de guardar.",
+                    Duration = 7000,
+                };
+            notificationService.Notify(mensaje);
+        }
+
+
+        entidadesMuestreoAgua.ListaParametros.Add(detalleDeshacer);
+        DetallesRemovidos.Remove(detalleDeshacer);
+        StateHasChanged();
+    }
+
+    public async Task CargarParametros()
+    {
+        var ParametrosEncontrado = await httpClient.GetFromJsonAsync<List<Parametros>>($"api/Parametros");
+        ListaParametrosParaVer = ParametrosEncontrado;
+
+    }
+
+    public async Task BuscarParametros()
+    {
+        try
+        {
+            await httpClient.GetFromJsonAsync<List<Parametros>>($"api/Parametros");
+        }
+        catch
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "No se ha encontrado.",
+                    Detail = "No se encontró un parametro con el criterio que estás buscando.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            this.Nuevo();
+            return;
+        }
+        var ParametrosEncontrado = await httpClient.GetFromJsonAsync<List<Parametros>>($"api/Parametros");
+
+        
+
+        if (ParametrosEncontrado != null)
+        {
+            ListaParametros = ParametrosEncontrado.Where(p => (Filtro == 0 || p.ParametroId == Filtro) &&
+                                         (string.IsNullOrEmpty(Descripción) || (p.Descripción != null && p.Descripción
+                                                                                                        .ToLower()
+                                                                                                        .Contains(Descripción.ToLower()))))
+                                                                                                        .ToList();
+            StateHasChanged();
+        }
+    }
+
+
+}
