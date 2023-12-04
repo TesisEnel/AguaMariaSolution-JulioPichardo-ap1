@@ -12,55 +12,55 @@ namespace AguaMariaSolutionsDoNet8.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReviewsController : ControllerBase
+    public class AdminsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public ReviewsController(ApplicationDbContext context)
+        public AdminsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Reviews
+        // GET: api/Admins
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Reviews>>> GetReviews()
+        public async Task<ActionResult<IEnumerable<Admins>>> GetAdmins()
         {
-          if (_context.Reviews == null)
+          if (_context.Admins == null)
           {
               return NotFound();
           }
-            return await _context.Reviews.ToListAsync();
+            return await _context.Admins.ToListAsync();
         }
 
-        // GET: api/Reviews/5
+        // GET: api/Admins/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Reviews>> GetReviews(int id)
+        public async Task<ActionResult<Admins>> GetAdmins(int id)
         {
-          if (_context.Reviews == null)
+          if (_context.Admins == null)
           {
               return NotFound();
           }
-            var reviews = await _context.Reviews.FindAsync(id);
+            var admins = await _context.Admins.FindAsync(id);
 
-            if (reviews == null)
+            if (admins == null)
             {
                 return NotFound();
             }
 
-            return reviews;
+            return admins;
         }
 
-        // PUT: api/Reviews/5
+        // PUT: api/Admins/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutReviews(int id, Reviews reviews)
+        public async Task<IActionResult> PutAdmins(int id, Admins admins)
         {
-            if (id != reviews.ReviewId)
+            if (id != admins.AdminId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(reviews).State = EntityState.Modified;
+            _context.Entry(admins).State = EntityState.Modified;
 
             try
             {
@@ -68,7 +68,7 @@ namespace AguaMariaSolutionsDoNet8.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ReviewsExists(id))
+                if (!AdminsExists(id))
                 {
                     return NotFound();
                 }
@@ -81,42 +81,43 @@ namespace AguaMariaSolutionsDoNet8.Controllers
             return NoContent();
         }
 
-        // POST: api/Reviews
+        // POST: api/Admins
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Reviews>> PostReviews(Reviews reviews)
+        public async Task<ActionResult<Admins>> PostAdmins(Admins admins)
         {
-          if(!ReviewsExists(reviews.ReviewId))
-                _context.Reviews.Add(reviews);
-          else
-                _context.Reviews.Update(reviews);
-          await _context.SaveChangesAsync();
-            return Ok(reviews);
+                if (!AdminsExists(admins.AdminId))
+                    _context.Admins.Add(admins);
+                else
+                    _context.Admins.Update(admins);
+
+                await _context.SaveChangesAsync();
+                return Ok(admins);
         }
 
-        // DELETE: api/Reviews/5
+        // DELETE: api/Admins/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReviews(int id)
+        public async Task<IActionResult> DeleteAdmins(int id)
         {
-            if (_context.Reviews == null)
+            if (_context.Admins == null)
             {
                 return NotFound();
             }
-            var reviews = await _context.Reviews.FindAsync(id);
-            if (reviews == null)
+            var admins = await _context.Admins.FindAsync(id);
+            if (admins == null)
             {
                 return NotFound();
             }
 
-            _context.Reviews.Remove(reviews);
+            _context.Admins.Remove(admins);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool ReviewsExists(int id)
+        private bool AdminsExists(int id)
         {
-            return (_context.Reviews?.Any(e => e.ReviewId == id)).GetValueOrDefault();
+            return (_context.Admins?.Any(e => e.AdminId == id)).GetValueOrDefault();
         }
     }
 }

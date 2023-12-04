@@ -8,59 +8,59 @@ using Microsoft.EntityFrameworkCore;
 using AguaMariaSolutionsDoNet8.Data;
 using AguaMariaSolutionsDoNet8.Shared.Models;
 
-namespace AguaMariaSolutionsDoNet8.Controllers
-{
+namespace AguaMariaSolutionsDoNet8.Controllers 
+{ 
     [Route("api/[controller]")]
     [ApiController]
-    public class ParametrosController : ControllerBase
+    public class ReferenciasController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public ParametrosController(ApplicationDbContext context)
+        public ReferenciasController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Parametros
+        // GET: api/Referencias
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Parametros>>> GetParametros()
+        public async Task<ActionResult<IEnumerable<Referencias>>> GetReferencias()
         {
-          if (_context.Parametros == null)
+          if (_context.Referencias == null)
           {
               return NotFound();
           }
-            return await _context.Parametros.ToListAsync();
+            return await _context.Referencias.ToListAsync();
         }
 
-        // GET: api/Parametros/5
+        // GET: api/Referencias/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Parametros>> GetParametros(int id)
+        public async Task<ActionResult<Referencias>> GetReferencias(int id)
         {
-          if (_context.Parametros == null)
+          if (_context.Referencias == null)
           {
               return NotFound();
           }
-            var parametros = await _context.Parametros.FindAsync(id);
+            var referencias = await _context.Referencias.FindAsync(id);
 
-            if (parametros == null)
+            if (referencias == null)
             {
                 return NotFound();
             }
 
-            return parametros;
+            return referencias;
         }
 
-        // PUT: api/Parametros/5
+        // PUT: api/Referencias/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutParametros(int id, Parametros parametros)
+        public async Task<IActionResult> PutReferencias(int id, Referencias referencias)
         {
-            if (id != parametros.ParametroId)
+            if (id != referencias.ReferenciaId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(parametros).State = EntityState.Modified;
+            _context.Entry(referencias).State = EntityState.Modified;
 
             try
             {
@@ -68,7 +68,7 @@ namespace AguaMariaSolutionsDoNet8.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ParametrosExists(id))
+                if (!ReferenciasExists(id))
                 {
                     return NotFound();
                 }
@@ -81,42 +81,42 @@ namespace AguaMariaSolutionsDoNet8.Controllers
             return NoContent();
         }
 
-        // POST: api/Parametros
+        // POST: api/Referencias
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Parametros>> PostParametros(Parametros parametros)
+        public async Task<ActionResult<Referencias>> PostReferencias(Referencias referencias)
         {
-            if (!ParametrosExists(parametros.ParametroId))
-                _context.Parametros.Add(parametros);
+            if (!ReferenciasExists(referencias.ReferenciaId))
+                _context.Referencias.Add(referencias);
             else
-                _context.Parametros.Update(parametros);
+                _context.Referencias.Update(referencias);
             await _context.SaveChangesAsync();
-            return Ok(parametros);
+            return Ok(referencias);
         }
 
-        // DELETE: api/Parametros/5
+        // DELETE: api/Referencias/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteParametros(int id)
+        public async Task<IActionResult> DeleteReferencias(int id)
         {
-            if (_context.Parametros == null)
+            if (_context.Referencias == null)
             {
                 return NotFound();
             }
-            var parametros = await _context.Parametros.FindAsync(id);
-            if (parametros == null)
+            var referencias = await _context.Referencias.FindAsync(id);
+            if (referencias == null)
             {
                 return NotFound();
             }
 
-            _context.Parametros.Remove(parametros);
+            _context.Referencias.Remove(referencias);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool ParametrosExists(int id)
+        private bool ReferenciasExists(int id)
         {
-            return (_context.Parametros?.Any(e => e.ParametroId == id)).GetValueOrDefault();
+            return (_context.Referencias?.Any(e => e.ReferenciaId == id)).GetValueOrDefault();
         }
     }
 }
