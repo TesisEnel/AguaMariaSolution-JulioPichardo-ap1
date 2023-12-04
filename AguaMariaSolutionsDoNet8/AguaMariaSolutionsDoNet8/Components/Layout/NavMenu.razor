@@ -17,7 +17,175 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
+        <!--Registros y consultas empleados-->
+        <AuthorizeView Roles="Empleado">
+            <Authorized>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="RegistroProductoTerminado">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registrar Calidad PT
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/ControlCalidadAgua">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registrar Calidad PA
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="RecordBotellones">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Record Lav. Botellones
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="ConsultaProductoterminado">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consulta PT
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/ControlCalidadAgua">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consulta PA
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="ConsultaRecords">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consulta Lav. Botellones
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultas/Referencias">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consultar Referencias
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/EntidadesMuestreoAgua">
+                        <span class="oi oi-list" aria-hidden="true"></span> Consultar Entidades de Muestro
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <!--Registros y consultas Admin-->
+            <Authorized>
+                <div class="navbar-text px-3 text-white">Registro y Consultas <br /> de Documentos</div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="RegistroProductoTerminado">
+                        <span aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Registrar Calidad PT
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/ControlCalidadAgua">
+                        <span class="oi oi-plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Registrar Calidad PA
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="RecordBotellones">
+                        <span class="oi oi-plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Record Lav. Botellones
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="RegistroProducto">
+                        <span class="oi oi-plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Registro Productos
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="ConsultaProductoterminado">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consulta PT
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/ControlCalidadAgua">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consulta PA
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="ConsultaRecords">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consulta Lav. Botellones
+                    </NavLink>
+                </div>
+                <div class="navbar-text px-3 text-white">Registros de Entidades</div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/Parametros">
+                        <span class="oi oi-plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Registro Par&aacute;metros
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="RegistroClientes">
+                        <span class="oi oi-plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Registro Cliente
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Account/Register/Empleados">
+                        <span class="oi oi-plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Registro Empleado
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="/Account/Register/Admin">
+                        <span class="oi oi-plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Registro Admins
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/referencias">
+                        <span class="oi oi-plus" aria-hidden="true" style="font-size: smaller;"><i class="bi bi-plus-lg"></i></span> Registro de referencias
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Registros/EntidadesMuestreoAgua">
+                        <span class="oi oi-plus" aria-hidden="true" style="font-size: smaller;"><i class="bi bi-plus-lg"></i></span> Registro Entidades de Muestreo
+                    </NavLink>
+                </div>
+
+                <div class="navbar-text px-3 text-white">Consultas de Entidades</div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="ConsultaEmpleado">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consulta Empleados
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/Parametros">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consultar Par&aacute;metros
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/Admins">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consultar Admins
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultas/Referencias">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consultar Referencias
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Consultar/EntidadesMuestreoAgua">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consultar Entidades de Muestro
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="ReviewsAguaMariaAdmin">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Reviews
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
         <AuthorizeView>
+            <NotAuthorized>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="ReviewsAguaMaria">
+                        <span class="oi oi-list" aria-hidden="true"><i class="bi bi-plus-lg"></i></span> Reviews
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="ConsultaProducto">
+                <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consulta Productos
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="ConsultaReviews">
+                <span class="oi oi-list" aria-hidden="true"><i class="bi bi-list-columns-reverse"></i></span> Consulta Reviews
+            </NavLink>
+        </div>
+        @* <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Register/Empleados">
@@ -79,41 +247,31 @@
                         <span class="oi oi-list" aria-hidden="true"></span> Reviews
                     </NavLink>
                 </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView>
-            <NotAuthorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="ReviewsAguaMaria">
-                        <span class="oi oi-list" aria-hidden="true"></span> Reviews
+                    <NavLink class="nav-link" href="/Registros/Admins">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registro Admin
                     </NavLink>
                 </div>
-            </NotAuthorized>
-        </AuthorizeView>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ConsultaProducto">
-                <span class="oi oi-list" aria-hidden="true"></span> Consulta Productos
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ConsultaReviews">
-                <span class="oi oi-list" aria-hidden="true"></span> Consulta Reviews
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/Account/Register/Admin">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Registro Admin Real
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView> *@
+        <div class="nav-item">
             <NavLink class="nav-link" href="auth">
                 <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
             </NavLink>
         </div>
-
         <AuthorizeView>
             <Authorized>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="Account/Manage">
                         <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
@@ -124,7 +282,7 @@
                 </div>
             </Authorized>
             <NotAuthorized>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="Account/Login">
                         <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
                     </NavLink>

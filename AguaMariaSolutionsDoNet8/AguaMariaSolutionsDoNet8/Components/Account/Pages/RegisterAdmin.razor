@@ -20,7 +20,7 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Registro de Empleados</h1>
+<h1>Registro de Admin</h1>
 
 <div class="row">
     <div class="col-md-4">
@@ -56,21 +56,7 @@
                 <ValidationMessage For="() => Input.Apellido" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Dirección" class="form-control" aria-required="true" placeholder="Address" />
-                <label>Address</label>
-                <ValidationMessage For="() => Input.Dirección" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Teléfono" class="form-control" aria-required="true" placeholder="8098457812" />
-                <label>Phone</label>
-                <ValidationMessage For="() => Input.Teléfono" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Celular" class="form-control" aria-required="true" placeholder="8298457812" />
-                <label>Cellphone</label>
-                <ValidationMessage For="() => Input.Celular" class="text-danger" />
                 <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-
             </div>
 
         </EditForm>
@@ -85,7 +71,7 @@
 </div>
 
 @code {
-    public Empleados empleados { get; set; } = new Empleados();
+    public Admins admins { get; set; } = new Admins();
     private IEnumerable<IdentityError>? identityErrors;
 
     [SupplyParameterFromForm]
@@ -111,25 +97,22 @@
             return;
         }
         /////////////////////////////////////////////////////
-        //Para que el usuario se registre como empleado
-        var nuevoEmpleado = new Empleados
+        //Para que el usuario se registre como Admin
+        var nuevoAdmin = new Admins
             {
                 Nombre = Input.Nombre,
                 Apellido = Input.Apellido,
-                Dirección = Input.Dirección,
-                Teléfono = Input.Teléfono,
-                Celular = Input.Celular,
                 Email = Input.Email,
-                Clave = Input.Password
+                Contraseña = Input.Password
             };
 
         // Agregar el nuevo empleado a la base de datos
-        DbContext.Empleados.Add(nuevoEmpleado);
+        DbContext.Admins.Add(nuevoAdmin);
         await DbContext.SaveChangesAsync();
 
-        // Buscar el rol "Empleado"
+        // Buscar el rol "Admin"
 
-        var roleName = "Empleado";
+        var roleName = "Admin";
         var role = await DbContext.Roles
             .FirstOrDefaultAsync(r => r.NormalizedName == roleName.ToUpper());
 
@@ -208,7 +191,6 @@
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
 
-
         [Required(ErrorMessage = "Campo Obligatorio")]
         [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Este campo no acepta digitos")]
         public string? Nombre { get; set; }
@@ -216,16 +198,5 @@
         [Required(ErrorMessage = "Campo Obligatorio")]
         [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Este campo no acepta digitos")]
         public string? Apellido { get; set; }
-
-        [Required(ErrorMessage = "Campo Obligatorio")]
-        public string? Dirección { get; set; }
-
-        [RegularExpression(@"^\d{10}$", ErrorMessage = "Ingrese el telefono correctamente, Ejemplo: 8094587412")]
-        [Required(ErrorMessage = "Campo Obligatorio")]
-        public string? Teléfono { get; set; }
-
-        [RegularExpression(@"^\d{10}$", ErrorMessage = "Ingrese el Celular correctamente, Ejemplo: 8294587412")]
-        [Required(ErrorMessage = "Campo Obligatorio")]
-        public string? Celular { get; set; }
     }
 }

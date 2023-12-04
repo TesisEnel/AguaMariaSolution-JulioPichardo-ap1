@@ -2,7 +2,7 @@
 @page "/RegistroClientes/{ClienteId:int}";
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
-@attribute [Authorize]
+@attribute [Authorize(Roles ="Admin")]
 @rendermode InteractiveAuto
 <RadzenNotification />
 <EditForm Model="clientes" OnValidSubmit="Guardar">

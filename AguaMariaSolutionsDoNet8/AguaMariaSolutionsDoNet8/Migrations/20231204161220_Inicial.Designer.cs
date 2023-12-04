@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AguaMariaSolutionsDoNet8.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231201144020_Nueva tabla productos")]
-    partial class Nuevatablaproductos
+    [Migration("20231204161220_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -82,6 +82,33 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.Admins", b =>
+                {
+                    b.Property<int>("AdminId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Apellido")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Contraseña")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("AdminId");
+
+                    b.ToTable("Admins");
                 });
 
             modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.Clientes", b =>
@@ -223,7 +250,7 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                     b.ToTable("Empleados");
                 });
 
-            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.EntidadesMuestreoAgua", b =>
+            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.EntidadesMuestreoAguas", b =>
                 {
                     b.Property<int>("EntidadesMuestreoAguaId")
                         .ValueGeneratedOnAdd()
@@ -235,7 +262,7 @@ namespace AguaMariaSolutionsDoNet8.Migrations
 
                     b.HasKey("EntidadesMuestreoAguaId");
 
-                    b.ToTable("EntidadesMuestreoAgua");
+                    b.ToTable("EntidadesMuestreoAguas");
 
                     b.HasData(
                         new
@@ -396,122 +423,343 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                         },
                         new
                         {
-                            ParametroId = 20,
+                            ParametroId = 120,
                             Descripción = "Cloro Residual",
                             Máximo = 1.5f,
                             Mínimo = 1f
                         },
                         new
                         {
-                            ParametroId = 21,
+                            ParametroId = 121,
                             Descripción = "Dureza",
                             Máximo = 500f,
                             Mínimo = 68.4f
                         },
                         new
                         {
-                            ParametroId = 22,
+                            ParametroId = 122,
                             Descripción = "STD",
                             Máximo = 1000f,
                             Mínimo = 70f
                         },
                         new
                         {
-                            ParametroId = 23,
+                            ParametroId = 123,
                             Descripción = "Color",
                             Máximo = 15f,
                             Mínimo = 5f
                         },
                         new
                         {
-                            ParametroId = 24,
+                            ParametroId = 124,
                             Descripción = "Turbidez",
                             Máximo = 25f,
                             Mínimo = 10f
                         },
                         new
                         {
-                            ParametroId = 25,
+                            ParametroId = 125,
                             Descripción = "Sulfato",
                             Máximo = 400f,
                             Mínimo = 250f
                         },
                         new
                         {
-                            ParametroId = 26,
+                            ParametroId = 126,
                             Descripción = "Nitrato",
                             Máximo = 50f,
                             Mínimo = 10f
                         },
                         new
                         {
-                            ParametroId = 27,
-                            Descripción = "PH",
-                            Máximo = 8.5f,
-                            Mínimo = 6.5f
-                        },
-                        new
-                        {
-                            ParametroId = 30,
+                            ParametroId = 130,
                             Descripción = "Cloro Residual",
                             Máximo = 0.05f,
                             Mínimo = 0f
                         },
                         new
                         {
-                            ParametroId = 31,
-                            Descripción = "Color",
-                            Máximo = 15f,
-                            Mínimo = 5f
-                        },
-                        new
-                        {
-                            ParametroId = 32,
-                            Descripción = "Turbidez",
-                            Máximo = 25f,
-                            Mínimo = 10f
-                        },
-                        new
-                        {
-                            ParametroId = 33,
+                            ParametroId = 133,
                             Descripción = "Olor",
                             Máximo = 1f,
-                            Mínimo = 0f
+                            Mínimo = 1f
                         },
                         new
                         {
-                            ParametroId = 40,
-                            Descripción = "Dureza",
-                            Máximo = 500f,
-                            Mínimo = 0f
-                        },
-                        new
-                        {
-                            ParametroId = 41,
-                            Descripción = "STD",
-                            Máximo = 1000f,
-                            Mínimo = 70f
-                        },
-                        new
-                        {
-                            ParametroId = 42,
-                            Descripción = "PH",
-                            Máximo = 8.5f,
-                            Mínimo = 6.5f
-                        },
-                        new
-                        {
-                            ParametroId = 50,
-                            Descripción = "PH",
-                            Máximo = 8.5f,
-                            Mínimo = 6.5f
-                        },
-                        new
-                        {
-                            ParametroId = 51,
+                            ParametroId = 151,
                             Descripción = "STD",
                             Máximo = 500f,
                             Mínimo = 2f
+                        });
+                });
+
+            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.ParametrosEntidadesMuestreoAguas", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EntidadesMuestreoAguaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("EntidadesMuestreoAguasEntidadesMuestreoAguaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ParametroId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntidadesMuestreoAguasEntidadesMuestreoAguaId");
+
+                    b.ToTable("ParametrosEntidadesMuestreoAguas");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EntidadesMuestreoAguaId = 1,
+                            ParametroId = 120
+                        },
+                        new
+                        {
+                            Id = 2,
+                            EntidadesMuestreoAguaId = 1,
+                            ParametroId = 121
+                        },
+                        new
+                        {
+                            Id = 3,
+                            EntidadesMuestreoAguaId = 1,
+                            ParametroId = 122
+                        },
+                        new
+                        {
+                            Id = 4,
+                            EntidadesMuestreoAguaId = 1,
+                            ParametroId = 123
+                        },
+                        new
+                        {
+                            Id = 5,
+                            EntidadesMuestreoAguaId = 1,
+                            ParametroId = 124
+                        },
+                        new
+                        {
+                            Id = 6,
+                            EntidadesMuestreoAguaId = 1,
+                            ParametroId = 125
+                        },
+                        new
+                        {
+                            Id = 7,
+                            EntidadesMuestreoAguaId = 1,
+                            ParametroId = 126
+                        },
+                        new
+                        {
+                            Id = 8,
+                            EntidadesMuestreoAguaId = 1,
+                            ParametroId = 6
+                        },
+                        new
+                        {
+                            Id = 9,
+                            EntidadesMuestreoAguaId = 2,
+                            ParametroId = 120
+                        },
+                        new
+                        {
+                            Id = 10,
+                            EntidadesMuestreoAguaId = 2,
+                            ParametroId = 121
+                        },
+                        new
+                        {
+                            Id = 11,
+                            EntidadesMuestreoAguaId = 2,
+                            ParametroId = 122
+                        },
+                        new
+                        {
+                            Id = 12,
+                            EntidadesMuestreoAguaId = 2,
+                            ParametroId = 123
+                        },
+                        new
+                        {
+                            Id = 13,
+                            EntidadesMuestreoAguaId = 2,
+                            ParametroId = 124
+                        },
+                        new
+                        {
+                            Id = 14,
+                            EntidadesMuestreoAguaId = 2,
+                            ParametroId = 125
+                        },
+                        new
+                        {
+                            Id = 15,
+                            EntidadesMuestreoAguaId = 2,
+                            ParametroId = 126
+                        },
+                        new
+                        {
+                            Id = 16,
+                            EntidadesMuestreoAguaId = 2,
+                            ParametroId = 6
+                        },
+                        new
+                        {
+                            Id = 17,
+                            EntidadesMuestreoAguaId = 3,
+                            ParametroId = 120
+                        },
+                        new
+                        {
+                            Id = 18,
+                            EntidadesMuestreoAguaId = 3,
+                            ParametroId = 121
+                        },
+                        new
+                        {
+                            Id = 19,
+                            EntidadesMuestreoAguaId = 3,
+                            ParametroId = 122
+                        },
+                        new
+                        {
+                            Id = 20,
+                            EntidadesMuestreoAguaId = 3,
+                            ParametroId = 123
+                        },
+                        new
+                        {
+                            Id = 21,
+                            EntidadesMuestreoAguaId = 3,
+                            ParametroId = 124
+                        },
+                        new
+                        {
+                            Id = 22,
+                            EntidadesMuestreoAguaId = 3,
+                            ParametroId = 125
+                        },
+                        new
+                        {
+                            Id = 23,
+                            EntidadesMuestreoAguaId = 3,
+                            ParametroId = 126
+                        },
+                        new
+                        {
+                            Id = 24,
+                            EntidadesMuestreoAguaId = 3,
+                            ParametroId = 6
+                        },
+                        new
+                        {
+                            Id = 25,
+                            EntidadesMuestreoAguaId = 4,
+                            ParametroId = 120
+                        },
+                        new
+                        {
+                            Id = 26,
+                            EntidadesMuestreoAguaId = 4,
+                            ParametroId = 121
+                        },
+                        new
+                        {
+                            Id = 27,
+                            EntidadesMuestreoAguaId = 4,
+                            ParametroId = 122
+                        },
+                        new
+                        {
+                            Id = 29,
+                            EntidadesMuestreoAguaId = 4,
+                            ParametroId = 123
+                        },
+                        new
+                        {
+                            Id = 30,
+                            EntidadesMuestreoAguaId = 4,
+                            ParametroId = 124
+                        },
+                        new
+                        {
+                            Id = 31,
+                            EntidadesMuestreoAguaId = 4,
+                            ParametroId = 125
+                        },
+                        new
+                        {
+                            Id = 32,
+                            EntidadesMuestreoAguaId = 4,
+                            ParametroId = 126
+                        },
+                        new
+                        {
+                            Id = 33,
+                            EntidadesMuestreoAguaId = 4,
+                            ParametroId = 6
+                        },
+                        new
+                        {
+                            Id = 34,
+                            EntidadesMuestreoAguaId = 5,
+                            ParametroId = 130
+                        },
+                        new
+                        {
+                            Id = 35,
+                            EntidadesMuestreoAguaId = 5,
+                            ParametroId = 123
+                        },
+                        new
+                        {
+                            Id = 36,
+                            EntidadesMuestreoAguaId = 5,
+                            ParametroId = 124
+                        },
+                        new
+                        {
+                            Id = 37,
+                            EntidadesMuestreoAguaId = 5,
+                            ParametroId = 133
+                        },
+                        new
+                        {
+                            Id = 38,
+                            EntidadesMuestreoAguaId = 6,
+                            ParametroId = 5
+                        },
+                        new
+                        {
+                            Id = 39,
+                            EntidadesMuestreoAguaId = 6,
+                            ParametroId = 122
+                        },
+                        new
+                        {
+                            Id = 40,
+                            EntidadesMuestreoAguaId = 6,
+                            ParametroId = 6
+                        },
+                        new
+                        {
+                            Id = 41,
+                            EntidadesMuestreoAguaId = 7,
+                            ParametroId = 6
+                        },
+                        new
+                        {
+                            Id = 42,
+                            EntidadesMuestreoAguaId = 7,
+                            ParametroId = 151
                         });
                 });
 
@@ -616,6 +864,158 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                     b.HasIndex("EmpleadoId");
 
                     b.ToTable("RecordLavadoraBotellones");
+                });
+
+            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.Referencias", b =>
+                {
+                    b.Property<int>("ReferenciaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Descripción")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ParametroId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ReferenciaId");
+
+                    b.ToTable("Referencias");
+
+                    b.HasData(
+                        new
+                        {
+                            ReferenciaId = 1,
+                            Descripción = "mg/L",
+                            ParametroId = 1
+                        },
+                        new
+                        {
+                            ReferenciaId = 2,
+                            Descripción = "mg/L",
+                            ParametroId = 2
+                        },
+                        new
+                        {
+                            ReferenciaId = 3,
+                            Descripción = "mg/L",
+                            ParametroId = 3
+                        },
+                        new
+                        {
+                            ReferenciaId = 4,
+                            Descripción = "CaCo3",
+                            ParametroId = 5
+                        },
+                        new
+                        {
+                            ReferenciaId = 5,
+                            Descripción = "mg/L",
+                            ParametroId = 7
+                        },
+                        new
+                        {
+                            ReferenciaId = 6,
+                            Descripción = "mg/L",
+                            ParametroId = 8
+                        },
+                        new
+                        {
+                            ReferenciaId = 7,
+                            Descripción = "mg/L",
+                            ParametroId = 9
+                        },
+                        new
+                        {
+                            ReferenciaId = 8,
+                            Descripción = "UNID",
+                            ParametroId = 10
+                        },
+                        new
+                        {
+                            ReferenciaId = 9,
+                            Descripción = "NTU",
+                            ParametroId = 11
+                        },
+                        new
+                        {
+                            ReferenciaId = 10,
+                            Descripción = "(1) Insipido y (0) Sapido",
+                            ParametroId = 12
+                        },
+                        new
+                        {
+                            ReferenciaId = 11,
+                            Descripción = "mg/L",
+                            ParametroId = 13
+                        },
+                        new
+                        {
+                            ReferenciaId = 12,
+                            Descripción = "(1) Sí y (0) no",
+                            ParametroId = 14
+                        },
+                        new
+                        {
+                            ReferenciaId = 13,
+                            Descripción = "mg/L",
+                            ParametroId = 120
+                        },
+                        new
+                        {
+                            ReferenciaId = 14,
+                            Descripción = "CaCo3",
+                            ParametroId = 121
+                        },
+                        new
+                        {
+                            ReferenciaId = 15,
+                            Descripción = "mg/L",
+                            ParametroId = 122
+                        },
+                        new
+                        {
+                            ReferenciaId = 16,
+                            Descripción = "U. Pt-Co",
+                            ParametroId = 123
+                        },
+                        new
+                        {
+                            ReferenciaId = 17,
+                            Descripción = "FTU",
+                            ParametroId = 124
+                        },
+                        new
+                        {
+                            ReferenciaId = 18,
+                            Descripción = "mg/L",
+                            ParametroId = 125
+                        },
+                        new
+                        {
+                            ReferenciaId = 19,
+                            Descripción = "mg/L",
+                            ParametroId = 126
+                        },
+                        new
+                        {
+                            ReferenciaId = 20,
+                            Descripción = "mg/L",
+                            ParametroId = 130
+                        },
+                        new
+                        {
+                            ReferenciaId = 21,
+                            Descripción = "(1) Inodoro y (0) Odoro",
+                            ParametroId = 133
+                        },
+                        new
+                        {
+                            ReferenciaId = 22,
+                            Descripción = "mg/L",
+                            ParametroId = 151
+                        });
                 });
 
             modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.Reviews", b =>
@@ -807,6 +1207,13 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.ParametrosEntidadesMuestreoAguas", b =>
+                {
+                    b.HasOne("AguaMariaSolutionsDoNet8.Shared.Models.EntidadesMuestreoAguas", null)
+                        .WithMany("ListaParametros")
+                        .HasForeignKey("EntidadesMuestreoAguasEntidadesMuestreoAguaId");
+                });
+
             modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.ProductoTerminadosDetalle", b =>
                 {
                     b.HasOne("AguaMariaSolutionsDoNet8.Shared.Models.ControlCalidadProductoTerminado", null)
@@ -913,6 +1320,11 @@ namespace AguaMariaSolutionsDoNet8.Migrations
                     b.Navigation("ControlCalidadProductoTerminado");
 
                     b.Navigation("RecordLavadoraBotellones");
+                });
+
+            modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.EntidadesMuestreoAguas", b =>
+                {
+                    b.Navigation("ListaParametros");
                 });
 
             modelBuilder.Entity("AguaMariaSolutionsDoNet8.Shared.Models.Productos", b =>

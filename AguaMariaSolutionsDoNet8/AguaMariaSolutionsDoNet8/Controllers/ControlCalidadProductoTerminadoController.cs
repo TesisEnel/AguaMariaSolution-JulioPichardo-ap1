@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using AguaMariaSolutionsDoNet8.Data;
 using AguaMariaSolutionsDoNet8.Shared.Models;
 
-namespace AguaMariaSolution.Server.Controllers
+namespace AguaMariaSolutionsDoNet8.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
