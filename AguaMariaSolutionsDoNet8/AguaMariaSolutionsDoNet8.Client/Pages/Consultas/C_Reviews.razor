@@ -1,6 +1,5 @@
 ﻿@page "/ConsultaReviews";
 @inject HttpClient httpClient
-@attribute [Authorize]
 @rendermode InteractiveAuto
 <div class="card-header row">
     <div class="col-md-4">
@@ -14,10 +13,14 @@
     <label>Filtrar Por:</label>
     <div class="col-md-6 input-group filter-input">
         <InputSelect @bind-Value="Filtro" class="form-select">
-            <option value="1">Review Id</option>
-            <option value="2">Cliente</option>
+            <AuthorizeView Roles="Admin,Empleado">
+                <Authorized>
+                    <option value="1">Review Id</option>
+                    <option value="2">Cliente</option>
+                    <option value="4">Comentario</option>
+                </Authorized>
+            </AuthorizeView>
             <option value="3">Producto</option>
-            <option value="4">Comentario</option>
             <option value="5">Valoraci&oacute;n</option>
         </InputSelect>
         <div class="input-group-append">
@@ -52,28 +55,44 @@
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
-                    <th>Review ID</th>
+                    <AuthorizeView Roles="Admin,Empleado">
+                        <Authorized>
+                            <th>Review ID</th>
+                        </Authorized>
+                    </AuthorizeView>
                     <th>Cliente</th>
                     <th>Producto</th>
                     <th>Comentario</th>
                     <th>Valoración</th>
                     <th>Fecha</th>
                     <th>Hora</th>
-                    <th></th>
+                    <AuthorizeView Roles="Admin,Empleado">
+                        <Authorized>
+                            <th></th>
+                        </Authorized>
+                    </AuthorizeView>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var Reviews in ListaReviews)
                 {
                     <tr>
-                        <td>@Reviews.ReviewId</td>
+                        <AuthorizeView Roles="Admin,Empleado">
+                            <Authorized>
+                                <td>@Reviews.ReviewId</td>
+                            </Authorized>
+                        </AuthorizeView>
                         <td>@ObtenerNombreCliente(Reviews.ClienteId)</td>
                         <td>@ObtenerNombreProducto(Reviews.ProductoId)</td>
                         <td>@Reviews.Comentario</td>
                         <td>@Reviews.Valoración</td>
                         <td>@Reviews.Fecha.ToString("MM/dd/yyyy")</td>
                         <td>@Reviews.Fecha.ToString("hh:mm:ss")</td>
-                        <td><a href="ReviewsAguaMaria/@Reviews.ReviewId">Ver</a></td>
+                        <AuthorizeView Roles="Admin">
+                            <Authorized>
+                                <td><a href="ReviewsAguaMariaAdmin/Review/@Reviews.ReviewId">Ver</a></td>
+                            </Authorized>
+                        </AuthorizeView>
                     </tr>
                 }
                 <tr>
