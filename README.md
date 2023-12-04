@@ -40,7 +40,7 @@ El sistema está diseñado para mejorar la eficiencia en la producción de botel
 
 
 ## **Desarolladores**
-Julio Cesar Pichardo Barranco – El Verraco
+Julio Cesar Pichardo Barranco 
 
 ![image](https://github.com/JPichardo2003/AguaMariaSolution/assets/138260886/230d2f28-103e-40bf-be0a-230818c3b6d4)
 
