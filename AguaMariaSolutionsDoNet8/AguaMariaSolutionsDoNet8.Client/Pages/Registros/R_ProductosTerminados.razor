@@ -5,6 +5,7 @@
 @attribute [Authorize]
 @rendermode InteractiveAuto
 <RadzenNotification />
+<PageTitle>Registro de Control Calidad Producto Terminado</PageTitle>
 <EditForm Model="productosTerminados" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="card">
@@ -14,17 +15,37 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <label>Producto Id:</label>
-                <div class="input-group col-md-6">
-                    <InputNumber @bind-Value="productosTerminados.ProductoTerminadoId" class="id-input"></InputNumber>
-                    <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Producto Id</label>
+                        <div class="input-group mb-4">
+                            <InputNumber @bind-Value="IdBuscado" class="form-control" aria-describedby="BotonBuscar" />
+                            <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="bi bi-search" /></button>
+                        </div>
+                    </div>
+                    <AuthorizeView Roles="Admin" Context="Admin">
+                        <Authorized>
+                            <div class="col-md-4">
+                                <label>Fecha:</label>
+                                <InputDate @bind-Value="productosTerminados.Fecha" class="form-control"></InputDate>
+                                <ValidationMessage For="@(() => productosTerminados.Fecha)" />
+                            </div>
+                        </Authorized>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="Empleado" Context="Empleado">
+                        <Authorized>
+                            <div class="col-2"></div>
+                            <div class="col-md-4">
+                                <label>Fecha registrado</label>
+                                <h5>@productosTerminados.Fecha</h5>
+                            </div>
+                        </Authorized>
+                    </AuthorizeView>
                 </div>
-                <div class="col-md-6">
-                    <label>Fecha:</label>
-                    <InputDate @bind-Value="productosTerminados.Fecha" class="form-control"></InputDate>
-                    <ValidationMessage For="@(() => productosTerminados.Fecha)" />
-                </div>
-                <div class="col-md-6">
+
+
+
+                <div class="col-md-4">
                     <label>Empleado:</label>
                     <InputNumber @bind-Value="productosTerminados.EmpleadoId" class="form-control"></InputNumber>
                     <ValidationMessage For="@(() => productosTerminados.EmpleadoId)" />
@@ -34,22 +55,25 @@
         </div>
         @*Detalles:*@
         <div class="card card-header">
-            <h3>Parametros</h3>
+            <h3 class="text-center">Par&aacute;metro</h3>
         </div>
         <div class="card-body border border-1">
             <div class="row">
                 <div class="col-md-6">
-                    <label>Parametros</label>
+                    <label>Par&aacute;metro</label>
                     <InputSelect @bind-Value="Detalles.ParametroId" class="form-select">
                         <option value="" hidden="hidden">Seleccione</option>
                         @foreach (var p in ListaParametros)
                         {
-                            if (p.ParametroId >= 1 && p.ParametroId <= 14)
+                            if (p == null)
+                            {
+                                break;
+                            }
+                            if (p.ParametroId >= 1 && p.ParametroId <= 100)
                             {
                                 <option value="@p.ParametroId">@p.Descripción</option>
                             }
-                            if (p.ParametroId == 15)
-                                break;
+
                         }
                     </InputSelect>
                     <ValidationMessage For="@(() => Detalles.ParametroId)" />
@@ -57,26 +81,7 @@
                 <div class="col-md-6">
                     <label>Valor</label>
                     <div class="input-group">
-                        @switch (Detalles.ParametroId)
-                        {
-                            case 12:
-                                <InputSelect @bind-Value="Detalles.Valor">
-                                    <option value="" hidden="hidden">Seleccione</option>
-                                    <option value="1">Insípido</option>
-                                    <option value="0">sápido</option>
-                                </InputSelect>
-                                break;
-                            case 14:
-                                <InputSelect @bind-Value="Detalles.Valor">
-                                    <option value="" hidden="hidden">Seleccione</option>
-                                    <option value="1">Sí</option>
-                                    <option value="0">No</option>
-                                </InputSelect>
-                                break;
-                            default:
-                                <InputNumber @bind-Value="Detalles.Valor" class="form-control col-1"></InputNumber>
-                                break;
-                        }
+                        <InputNumber @bind-Value="Detalles.Valor" class="form-control col-1"></InputNumber>
                         <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="bi bi-plus-lg" />Add </button>
                         <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="bi bi-arrow-clockwise" /> </button>
                     </div>
@@ -100,7 +105,7 @@
         <table class='table table-responsive table-striped'>
             <thead>
                 <tr>
-                    <th>Parametro Id</th>
+                    <th>Par&aacute;metro Id</th>
                     <th>Descripci&oacute;n</th>
                     <th>M&iacute;nimo</th>
                     <th>M&aacute;ximo</th>
@@ -134,9 +139,13 @@
         </div>
 
         <div class="card-footer text-center">
-            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
-            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
-            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="bi bi-file-earmark-diff-fill" /></button>
+            <button class="btn btn-success">Guardar <i class="bi bi-floppy-fill" /></button>
+            <AuthorizeView Roles="Admin" Context="Admin">
+                <Authorized>
+                    <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="bi bi-trash-fill" /></button>
+                </Authorized>
+            </AuthorizeView>
         </div>
     </div>
 </EditForm>
@@ -151,6 +160,7 @@
     public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
     public List<ProductoTerminadosDetalle> DetallesRemovidos { get; set; } = new List<ProductoTerminadosDetalle>();
     public List<ProductoTerminadosDetalle> ListaDetalles { get; set; } = new List<ProductoTerminadosDetalle>();
+    public int IdBuscado { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -163,6 +173,7 @@
         if (ProductoTerminadoId > 0)
         {
             this.productosTerminados.ProductoTerminadoId = ProductoTerminadoId;
+            IdBuscado = ProductoTerminadoId;
             await Buscar();
         }
         else
@@ -190,10 +201,10 @@
         ListaDetalles = new List<ProductoTerminadosDetalle>();
         var productoTerminadoIdEncontrado = (await httpClient.GetFromJsonAsync<List<ControlCalidadProductoTerminado>>($"api/ControlCalidadProductoTerminado"))!
         .ToList()
-        .Any(e => e.ProductoTerminadoId == productosTerminados.ProductoTerminadoId);
+        .Any(e => e.ProductoTerminadoId == IdBuscado);
         if (productoTerminadoIdEncontrado)
         {
-            var productoTerminadoEncontrado = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{productosTerminados.ProductoTerminadoId}");
+            var productoTerminadoEncontrado = await httpClient.GetFromJsonAsync<ControlCalidadProductoTerminado>($"api/ControlCalidadProductoTerminado/{IdBuscado}");
             if (productoTerminadoEncontrado != null)
             {
                 this.productosTerminados = productoTerminadoEncontrado;
@@ -210,6 +221,7 @@
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
+            this.Nuevo();
             return;
         }
     }
@@ -289,6 +301,7 @@
     public void Nuevo()
     {
         this.productosTerminados = new ControlCalidadProductoTerminado();
+        IdBuscado = 0;
         this.Detalles = new ProductoTerminadosDetalle();
         DetallesRemovidos = new List<ProductoTerminadosDetalle>();
         ListaDetalles = new List<ProductoTerminadosDetalle>();
@@ -384,8 +397,6 @@
             Detalles.ProductoTerminadoId = productosTerminados.ProductoTerminadoId;
             productosTerminados.ProductoTerminadosDetalle.Add(Detalles);
             ListaDetalles.Add(Detalles);
-            if (DetallesRemovidos.Any(d => d.DetalleId == Detalles.DetalleId))
-                DetallesRemovidos.Remove(Detalles);
             Detalles.Pasó = ValidarSiPasoDetalle();
             Detalles = new ProductoTerminadosDetalle();
 
@@ -472,6 +483,7 @@
             if (documento != null)
             {
                 this.productosTerminados = documento;
+                IdBuscado = documento.ProductoTerminadoId;
                 StateHasChanged();
             }
         }

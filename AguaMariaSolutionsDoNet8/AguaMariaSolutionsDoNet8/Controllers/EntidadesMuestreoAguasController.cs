@@ -25,23 +25,27 @@ namespace AguaMariaSolutionsDoNet8.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EntidadesMuestreoAguas>>> GetEntidadesMuestreoAgua()
         {
-          if (_context.EntidadesMuestreoAguas == null)
-          {
-              return NotFound();
-          }
-            return await _context.EntidadesMuestreoAguas.ToListAsync();
+            if (_context.EntidadesMuestreoAguas == null)
+            {
+                return NotFound();
+            }
+            return await _context.EntidadesMuestreoAguas
+                            .Include(e => e.ListaParametros)
+                            .ToListAsync();
         }
 
         // GET: api/EntidadesMuestreoAguas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<EntidadesMuestreoAguas>> GetEntidadesMuestreoAgua(int id)
         {
-          if (_context.EntidadesMuestreoAguas == null)
-          {
-              return NotFound();
-          }
-            var EntidadesMuestreoAguas = await _context.EntidadesMuestreoAguas.FindAsync(id);
-
+            if (_context.EntidadesMuestreoAguas == null)
+            {
+                return NotFound();
+            }
+            var EntidadesMuestreoAguas = await _context.EntidadesMuestreoAguas
+                                                        .Include(e => e.ListaParametros)
+                                                        .Where(e => e.EntidadesMuestreoAguaId == id)
+                                                        .FirstOrDefaultAsync(); ;
             if (EntidadesMuestreoAguas == null)
             {
                 return NotFound();
@@ -98,21 +102,38 @@ namespace AguaMariaSolutionsDoNet8.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEntidadesMuestreoAgua(int id)
         {
-            if (_context.EntidadesMuestreoAguas == null)
+            try
             {
-                return NotFound();
+                var entidadesMuestreoAguas = await _context.EntidadesMuestreoAguas
+                    .Include(e => e.ListaParametros)
+                    .FirstOrDefaultAsync(e => e.EntidadesMuestreoAguaId == id);
+
+                if (entidadesMuestreoAguas == null)
+                {
+                    return NotFound();
+                }
+
+                // Delete related records in ParametrosEntidadesMuestreoAguas
+                foreach (var detalle in entidadesMuestreoAguas.ListaParametros)
+                {
+                    _context.ParametrosEntidadesMuestreoAguas.Remove(detalle);
+                }
+
+                // Delete the main record in EntidadesMuestreoAguas
+                _context.EntidadesMuestreoAguas.Remove(entidadesMuestreoAguas);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-            var entidadesMuestreoAguas = await _context.EntidadesMuestreoAguas.FindAsync(id);
-            if (entidadesMuestreoAguas == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                // Log the exception
+                Console.WriteLine($"Error: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
             }
-
-            _context.EntidadesMuestreoAguas.Remove(entidadesMuestreoAguas);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
+
+
 
         private bool EntidadesMuestreoAguaExists(int id)
         {

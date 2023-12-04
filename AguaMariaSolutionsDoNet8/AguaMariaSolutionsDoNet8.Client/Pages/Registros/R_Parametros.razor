@@ -3,9 +3,9 @@
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
 @rendermode InteractiveAuto
-<RadzenNotification/>
+<RadzenNotification />
 @attribute [Authorize(Roles = "Admin")]
-
+<PageTitle>Registro de parametros</PageTitle>
 <EditForm Model="Parametro" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="card">
@@ -17,7 +17,7 @@
             <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
                 <label>Par&aacute;metro Id</label>
                 <div class="input-group mb-3">
-                    <InputNumber @bind-Value="Parametro.ParametroId" class="form-control" aria-describedby="BotonBuscar" />
+                    <InputNumber @bind-Value="IdBuscado" class="form-control" aria-describedby="BotonBuscar" />
                     <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="bi bi-search" /></button>
                 </div>
             </div>
@@ -39,9 +39,9 @@
                 </div>
             </div>
         </div>
-        <div class="card-footer">
-            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
-            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+        <div class="card-footer text-center">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="bi bi-file-earmark-diff-fill" /></button>
+            <button class="btn btn-success">Guardar <i class="bi bi-floppy-fill" /></button>
             <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="bi bi-trash-fill" /></button>
         </div>
     </div>
@@ -53,14 +53,17 @@
     [Parameter]
 
     public int ParametroId { get; set; }
-
+    public int IdBuscado { get; set; }
     public Parametros Parametro { get; set; } = new Parametros();
+    public List<EntidadesMuestreoAguas> ListaEntidades { get; set; } = new List<EntidadesMuestreoAguas>();
 
     protected override async Task OnInitializedAsync()
     {
         if (ParametroId > 0)
         {
+            await CargarEntidades();
             this.Parametro.ParametroId = ParametroId;
+            IdBuscado = ParametroId;
             await Buscar();
         }
     }
@@ -69,7 +72,7 @@
     {
         try
         {
-            await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{Parametro.ParametroId}");
+            await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{IdBuscado}");
         }
         catch
         {
@@ -84,7 +87,7 @@
             this.Nuevo();
             return;
         }
-        var ParametroEncontrado = await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{Parametro.ParametroId}");
+        var ParametroEncontrado = await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{IdBuscado}");
         if (ParametroEncontrado != null)
         {
             this.Parametro = ParametroEncontrado;
@@ -138,7 +141,7 @@
     {
         if (!ValidarGuardar())
         {
-            return;    
+            return;
         }
         using var response = await httpClient.PostAsJsonAsync("api/Parametros", Parametro);
         if (!response.IsSuccessStatusCode)
@@ -161,7 +164,7 @@
             var mensaje = new NotificationMessage
                 {
                     Severity = NotificationSeverity.Success,
-                    Summary = "Validacion",
+                    Summary = "Validación",
                     Detail = "Parámetro Guardado Correctamente",
                     Duration = 4_000
                 };
@@ -171,7 +174,6 @@
             StateHasChanged();
         }
     }
-
     public void Nuevo()
     {
         this.Parametro = new Parametros();
@@ -179,6 +181,20 @@
 
     public async Task Eliminar()
     {
+
+        if (!ValidarEliminar())
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No es posible Eliminar, existe una entidad utilizando este parámetro",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
         using var response = await httpClient.DeleteAsync($"api/Parametros/{Parametro.ParametroId}");
         if (!response.IsSuccessStatusCode)
         {
@@ -197,13 +213,36 @@
             var mensaje = new NotificationMessage
                 {
                     Severity = NotificationSeverity.Success,
-                    Summary = "Validacion",
-                    Detail = "Pará  metro Eliminado Correctamente",
+                    Summary = "Validación",
+                    Detail = "Parámetro Eliminado Correctamente",
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
 
         }
         Nuevo();
+    }
+
+    public bool ValidarEliminar()
+    {
+
+        bool resultado = true;
+
+
+        foreach (var entidad in ListaEntidades)
+        {
+            if (entidad.ListaParametros.Any(p => p.ParametroId == Parametro.ParametroId))
+            {
+                resultado = false;
+            }
+        }
+        return resultado;
+    }
+
+    private async Task CargarEntidades()
+    {
+        var encontrados = await httpClient.GetFromJsonAsync<List<EntidadesMuestreoAguas>>("api/EntidadesMuestreoAguas");
+        if (encontrados != null)
+            ListaEntidades = encontrados;
     }
 }

@@ -27,7 +27,7 @@
 
             <div class="col-5">
                 <button type="button" @onclick="Buscar" class="btn btn-primary  ">
-                    <i class="oi oi-reload" />
+                    <i class="bi bi-search" />
                     <br /> Buscar
                 </button>
             </div>
@@ -65,7 +65,7 @@
                         <label class="form-control-label">Acci&oacute;n Tomada</label>
                         <InputText @bind-Value="AcciónTomada" class="form-control"></InputText>
                     }
-                    if (FiltrarPor == 2 || TandaId != 0)
+                    if (FiltrarPor == 4 || TandaId != 0)
                     {
                         <label class="form-control-label">Tanda</label>
                         <InputSelect @bind-Value="TandaId" class="form-select">
@@ -75,12 +75,12 @@
                             <option value="2">Tarde</option>
                         </InputSelect>
                     }
-                    if (FiltrarPor == 3 || EmpleadoId > 0)
+                    if (FiltrarPor == 2 || EmpleadoId > 0)
                     {
                         <label class="form-control-label">Empleado Id</label>
                         <InputNumber @bind-Value="EmpleadoId" class="form-control"></InputNumber>
                     }
-                    if (FiltrarPor == 4 || EntidadMuestreoAguaId > 0)
+                    if (FiltrarPor == 3 || EntidadMuestreoAguaId > 0)
                     {
                         <label class="form-control-label">Entidad Muestreo Agua Id</label>
                         <InputNumber @bind-Value="EntidadMuestreoAguaId" class="form-control"></InputNumber>
@@ -95,7 +95,7 @@
                 <thead>
                     <tr>
                         <th>Control Calidad Agua Id</th>
-                        <th>Fecha</th>
+                        <th>Fecha y hora</th>
                         <th>Acci&oacute;n Tomada</th>
                         <th>Tanda Id</th>
                         <th>Empleado Id</th>
@@ -108,12 +108,19 @@
                     {
                         <tr>
                             <td>@cCAguas.ControlCalidadAguaId</td>
-                            <td>@cCAguas.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@cCAguas.Fecha.ToString("dd/MM/yyyy hh:mm:ss")</td>
                             <td>@cCAguas.AcciónTomada</td>
-                            <td>@cCAguas.TandaId</td>
-                            <td>@cCAguas.EmpleadoId</td>
+                            @if(cCAguas.TandaId == 1)
+                            {
+                                <td>Mañana</td>
+                            }
+                            else if(cCAguas.TandaId == 2)
+                            {
+                                <td>Tarde</td>
+                            }
+                            <td>@ObtenerNombre(cCAguas.EmpleadoId)</td>
                             <td>@cCAguas.EntidadMuestreoAguaId</td>
-                            <td><a href="Registros/ControlCalidadAgua/@cCAguas.ControlCalidadAguaId">Ver</a></td>
+                            <td><a href="Registros/ControlCalidadAgua/@cCAguas.ControlCalidadAguaId"><i class="bi bi-eye"></i></a></td>
                         </tr>
                     }
                     <tr>
@@ -139,17 +146,18 @@
 
 @code {
     public List<ControlCalidadAgua> CCAgua = new List<ControlCalidadAgua>();
+    public List<Empleados> ListaEmpleados = new List<Empleados>();
 
     public int FiltrarPor = -2;
     public int Conteo = 0;
 
     protected override async Task OnInitializedAsync()
     {
+        ListaEmpleados = await httpClient.GetFromJsonAsync<List<Empleados>>($"api/Empleados");
         Desde = DateTime.Now.AddMonths(-1);
         Hasta = DateTime.Now;
         await Buscar();
         PrimeraEntrada = false;
-        await NotificarBusquedaMultiFiltro();
     }
 
     public int ControlCalidadAguaId { get; set; }
@@ -218,16 +226,10 @@
         StateHasChanged();
     }
 
-    public async Task NotificarBusquedaMultiFiltro()
+    public string ObtenerNombre(int Id)
     {
-        var mensaje = new NotificationMessage
-            {
-                Severity = NotificationSeverity.Info,
-                Summary = "Uso de Multifiltro",
-                Detail = "Puede aplicar varios filtros simultáneamente. Seleccione un filtro, ingrese los datos, luego utilice otro filtro y repita el proceso. Verá cómo se acumulan. Para eliminarlos, simplemente ingrese un 0. En el caso de concepto elimine el texto.",
-                Duration = 25000
-            };
-        notificationService.Notify(mensaje);
-        await Task.CompletedTask;
+        var empleado = ListaEmpleados.FirstOrDefault(p => p.EmpleadoId == Id);
+        return empleado?.Nombre ?? "Nombre no encontrado";
     }
+
 }

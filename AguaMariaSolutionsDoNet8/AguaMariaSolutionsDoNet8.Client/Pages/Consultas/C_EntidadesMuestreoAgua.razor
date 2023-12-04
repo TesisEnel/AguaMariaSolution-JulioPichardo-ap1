@@ -17,6 +17,7 @@
                 <label>Filtrar por Descripción:</label>
                 <InputText @bind-Value="Descripción" class="form-control"></InputText>
             </div>
+            <br /><br /><br />
             <div class="row">
                 <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
             </div>
@@ -29,7 +30,7 @@
                         <th>Entidad Id</th>
                         <th>Descripci&oacute;n</th>
                         <th>Ver Entidad</th>
-                        <AuthorizeView Roles="Administrador" Context="Admin">
+                        <AuthorizeView Roles="Admin" Context="Admin">
                             <Authorized>
                                  <th>Editar Entidad</th>
                             </Authorized>
@@ -47,10 +48,10 @@
                                 <td>@Entidad.Descripción</td>
                                 <td><button @onclick=@(() => Ver(Entidad)) 
                                             style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
-                                            <i class="oi oi-eye" style="color:forestgreen"></i></button></td>
-                                <AuthorizeView Roles="Administrador" Context="Admin">
+                                            <i class="bi bi-eye" style="color:forestgreen"></i></button></td>
+                                <AuthorizeView Roles="Admin" Context="Admin">
                                      <Authorized>
-                                       <td><a href="Registros/EntidadesMuestreoAgua/@Entidad.EntidadesMuestreoAguaId"><i class="oi oi-eye"></i></a></td>
+                                       <td><a href="Registros/EntidadesMuestreoAgua/@Entidad.EntidadesMuestreoAguaId"><i class="bi bi-eye"></i></a></td>
                                     </Authorized>
                                 </AuthorizeView>
                                

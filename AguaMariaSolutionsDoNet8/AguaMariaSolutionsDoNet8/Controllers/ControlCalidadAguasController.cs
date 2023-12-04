@@ -25,10 +25,10 @@ namespace AguaMariaSolutionsDoNet8.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ControlCalidadAgua>>> GetControlCalidadAgua()
         {
-          if (_context.ControlCalidadAgua == null)
-          {
-              return NotFound();
-          }
+            if (_context.ControlCalidadAgua == null)
+            {
+                return NotFound();
+            }
             return await _context.ControlCalidadAgua.ToListAsync();
         }
 
@@ -36,10 +36,10 @@ namespace AguaMariaSolutionsDoNet8.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ControlCalidadAgua>> GetControlCalidadAgua(int id)
         {
-          if (_context.ControlCalidadAgua == null)
-          {
-              return NotFound();
-          }
+            if (_context.ControlCalidadAgua == null)
+            {
+                return NotFound();
+            }
             var controlCalidadAgua = await _context.ControlCalidadAgua
                 .Include(c => c.ControlCalidadAguaDetalle)
                 .Where(c => c.ControlCalidadAguaId == id)
@@ -118,6 +118,24 @@ namespace AguaMariaSolutionsDoNet8.Controllers
             return NoContent();
         }
 
+        [HttpDelete("DeleteAguaDetalle/{id}")]
+        public async Task<IActionResult> DeleteAguaDetalle(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
+            var Detalle = await _context.ControlCalidadAguaDetalle.FirstOrDefaultAsync(ad => ad.ControlCalidadAguaDetalleId == id);
+            if (Detalle is null)
+            {
+                return NotFound();
+            }
+            _context.ControlCalidadAguaDetalle.Remove(Detalle);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         private bool ControlCalidadAguaExists(int id)
         {
             return (_context.ControlCalidadAgua?.Any(e => e.ControlCalidadAguaId == id)).GetValueOrDefault();
@@ -132,8 +150,10 @@ namespace AguaMariaSolutionsDoNet8.Controllers
             }
 
             var controlCalidadAgua = _context.ControlCalidadAgua
-                        .Include(c => c.ControlCalidadAguaDetalle)
-                        .OrderByDescending(c => c.Fecha).Take(1).FirstOrDefault();
+                                    .Include(c => c.ControlCalidadAguaDetalle)
+                                    .OrderByDescending(c => c.Fecha)
+                                    .Take(1)
+                                    .FirstOrDefault();
 
             if (controlCalidadAgua == null)
             {

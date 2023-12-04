@@ -7,38 +7,51 @@
 <RadzenNotification />
 
 <PageTitle>Registro Control Calidad Del Proceso Del Agua</PageTitle>
-
 <EditForm Model="controlCalidadAgua" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="card">
         <div class="card-header d-flex align-items-center">
             <img src="AguaMariaLogo.png" class="img-logo" />
-            <h1>Registro Control Calidad Del Proceso Del Agua</h1>     
+            <h1>Registro Control Calidad Del Proceso Del Agua</h1>
+
         </div>
         <div class="card-body">
             <div class="row">
-
-                <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
-                    <label>Poducto Id</label>
-                    <div class="input-group mb-3">
-                        <InputNumber @bind-Value="controlCalidadAgua.ControlCalidadAguaId" class="form-control" aria-describedby="BotonBuscar" />
-                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="bi bi-search" /></button>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
+                        <label>Documento Id</label>
+                        <div class="input-group mb-4">
+                            <InputNumber @bind-Value="IdBuscado" class="form-control" aria-describedby="BotonBuscar" />
+                            <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="bi bi-search" /></button>
+                        </div>
                     </div>
+
+                    <AuthorizeView Roles="Admin" Context="Admin">
+                        <Authorized>
+                            <div class="col-md-4">
+                                <label>Fecha:</label>
+                                <InputDate @bind-Value="controlCalidadAgua.Fecha" class="form-control"></InputDate>
+                                <ValidationMessage For="@(() => controlCalidadAgua.Fecha)" />
+                            </div>
+                        </Authorized>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="Empleado" Context="Empleado">
+                        <Authorized>
+                            <div class="col-2"></div>
+                            <div class="col-md-4">
+                                <label>Fecha registrado</label>
+                                <h5>@controlCalidadAgua.Fecha</h5>
+                            </div>
+                        </Authorized>
+                    </AuthorizeView>
                 </div>
-                
-                <div class="col-md-6">
-                    <label>Fecha:</label>
-                    <InputDate @bind-Value="controlCalidadAgua.Fecha" class="form-control"></InputDate>
-                    <ValidationMessage For="@(() => controlCalidadAgua.Fecha)" />
-                </div>
-                
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label>Empleado:</label>
                     <InputNumber @bind-Value="controlCalidadAgua.EmpleadoId" class="form-control"></InputNumber>
                     <ValidationMessage For="@(() => controlCalidadAgua.EmpleadoId)" />
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label>Tanda:</label>
                     <InputSelect @bind-Value="controlCalidadAgua.TandaId" class="form-select">
                         <option value="" disabled selected>Seleccione</option>
@@ -48,14 +61,16 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label>Entidad:</label>
-                        <InputSelect @bind-Value="controlCalidadAgua.EntidadMuestreoAguaId" class="form-select" @onblur="nuevoDetalle">
+                        <InputSelect @bind-Value="EntidadMuestreoAguaId" class="form-select" @onblur="CambiarParametrosYNuevoDetalle">
                             <option value="" hidden="hidden">Seleccione</option>
                             @foreach (var e in ListaEntidades)
                             {
                                 <option value="@e.EntidadesMuestreoAguaId">@e.Descripción</option>
+
                             }
+
                         </InputSelect>
                     </div>
                 </div>
@@ -64,80 +79,30 @@
 
         @*Detalles:*@
         <fieldset class="border-secondary border border-1">
-            <h3 class="text-center">Parametros</h3>
+            <h3 class="text-center">Par&aacute;metro</h3>
             <div class="card-body border border-1">
                 <div class="row">
                     <div class="col-md-4">
-                        <label>Parametros</label>
+                        <label>Par&aacute;metro</label>
                         <InputSelect @bind-Value="ParametroSeleccionado" class="form-select">
                             <option value="" hidden="hidden">Seleccione</option>
-                            @switch (controlCalidadAgua.EntidadMuestreoAguaId)
+                            @if (controlCalidadAgua.EntidadMuestreoAguaId != 0 && entidadesMuestreoAguas.ListaParametros.Count > 0)
                             {
-                                case 1:
-                                case 2:
-                                case 3:
-                                case 4:
-                                    for (int i = 20; i <= 27; i++)
+                                @foreach (var p in entidadesMuestreoAguas.ListaParametros)
+                                {
+                                    @if (p != null)
                                     {
-                                        var p = ListaParametros.FirstOrDefault(p => p.ParametroId == i);
-                                        if (p != null)
-                                        {
-                                            <option value="@p.ParametroId">@p.Descripción</option>
-                                        }
+                                        <option value="@p.ParametroId">@ObtenerDescripciónParámetro(p.ParametroId)</option>
                                     }
-                                    break;
-                                case 5:
-                                    for (int i = 30; i <= 33; i++)
-                                    {
-                                        var p = ListaParametros.FirstOrDefault(p => p.ParametroId == i);
-                                        if (p != null)
-                                        {
-                                            <option value="@p.ParametroId">@p.Descripción</option>
-                                        }
-                                    }
-                                    break;
-                                case 6:
-                                    for (int i = 40; i <= 42; i++)
-                                    {
-                                        var p = ListaParametros.FirstOrDefault(p => p.ParametroId == i);
-                                        if (p != null)
-                                        {
-                                            <option value="@p.ParametroId">@p.Descripción</option>
-                                        }
-                                    }
-                                    break;
-                                case 7:
-                                    for (int i = 50; i <= 51; i++)
-                                    {
-                                        var p = ListaParametros.FirstOrDefault(p => p.ParametroId == i);
-                                        if (p != null)
-                                        {
-                                            <option value="@p.ParametroId">@p.Descripción</option>
-                                        }
-                                    }
-                                    break;
+                                }
                             }
-                        }
-                        </InputSelect>
 
+                        </InputSelect>
                     </div>
                     <div class="col-6">
                         <label>Valor:</label>
                         <div class="input-group">
-                            @switch (ParametroSeleccionado)
-                            {
-                                case 33:
-                                    <InputSelect @bind-Value="Valor">
-                                        <option value="" hidden="hidden">Seleccione</option>
-                                        <option value="1">Inodoro</option>
-                                        <option value="0">Odoro</option>
-                                    </InputSelect>
-                                    break;
-                                default:
-                                    <InputNumber @bind-Value="Valor" class="form-control col-1"></InputNumber>
-                                    break;
-                            }
-                            
+                            <InputNumber @bind-Value="Valor" class="form-control col-1"></InputNumber>
                             <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle"><i class="bi bi-plus-lg" />Add </button>
                             <button type="button" class="btn btn-outline-warning" @onclick="Deshacer">Deshacer <i class="bi bi-arrow-clockwise" /> </button>
                         </div>
@@ -147,22 +112,22 @@
                 @if (ParametroSeleccionado != 0)
                 {
                     <div class="row">
-                    <div class="col-1">
-                        <label>M&iacute;nimo:</label>
-                        <h6>@ObtenerMínimo(ParametroSeleccionado)</h6>
-                    </div>
+                        <div class="col-1">
+                            <label>M&iacute;nimo:</label>
+                            <h6>@ObtenerMínimo(ParametroSeleccionado)</h6>
+                        </div>
 
-                    <div class="col-1">
-                        <label>M&aacute;ximo:</label>
-                        <h6>@ObtenerMáximo(ParametroSeleccionado)</h6>
-                    </div>
+                        <div class="col-1">
+                            <label>M&aacute;ximo:</label>
+                            <h6>@ObtenerMáximo(ParametroSeleccionado)</h6>
+                        </div>
                     </div>
                 }
             </div>
             <table class='table table-responsive table-striped'>
                 <thead>
                     <tr>
-                        <th>Parametro Id</th>
+                        <th>Par&aacute;metro Id</th>
                         <th>Descripci&oacute;n</th>
                         <th>M&iacute;nimo</th>
                         <th>M&aacute;ximo</th>
@@ -187,21 +152,23 @@
                 </tbody>
             </table>
         </fieldset>
-        
+
         <br />
         <hr />
         <div class="form-group col-10" style="margin: 5px;">
             <label>Acci&oacute;n Tomada:</label>
-            <textarea @bind="controlCalidadAgua.AcciónTomada" class="form-control" rows="3" ></textarea>
+            <textarea @bind="controlCalidadAgua.AcciónTomada" class="form-control" rows="3"></textarea>
             <ValidationMessage For="@(() => controlCalidadAgua.AcciónTomada)" />
         </div>
 
-
-
         <div class="card-footer text-center">
-            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
-            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
-            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="bi bi-file-earmark-diff-fill" /></button>
+            <button class="btn btn-success">Guardar <i class="bi bi-floppy-fill" /></button>
+            <AuthorizeView Roles="Admin" Context="Admin">
+                <Authorized>
+                    <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="bi bi-trash-fill" /></button>
+                </Authorized>
+            </AuthorizeView>
         </div>
     </div>
 </EditForm>
@@ -210,15 +177,19 @@
 {
     [Parameter]
     public int controlCalidadAguaId { get; set; }
+    public int IdBuscado { get; set; }
+    public int EntidadMuestreoAguaId { get; set; }
 
     public ControlCalidadAgua controlCalidadAgua { get; set; } = new ControlCalidadAgua();
+    public EntidadesMuestreoAguas entidadesMuestreoAguas { get; set; } = new EntidadesMuestreoAguas();
 
     public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
     public List<EntidadesMuestreoAguas> ListaEntidades { get; set; } = new List<EntidadesMuestreoAguas>();
     public List<ControlCalidadAguaDetalle> DetallesRemovidos { get; set; } = new List<ControlCalidadAguaDetalle>();
 
+
     public int ParametroSeleccionado;
-    public float Valor = -1f;
+    public float Valor = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -228,39 +199,43 @@
         if (controlCalidadAguaId > 0)
         {
             this.controlCalidadAgua.ControlCalidadAguaId = controlCalidadAguaId;
+            IdBuscado = controlCalidadAguaId;
             await Buscar();
         }
         else
         {
             await BuscarUltimoDocumento();
         }
-        var mensaje = new NotificationMessage
-            {
-                Severity = NotificationSeverity.Info,
-                Summary = "Cuidado",
-                Detail = "Al cambiar la entidad se eliminaran los detalles agregados.",
-                Duration = 4000
-            };
-        notificationService.Notify(mensaje);
+    }
+
+
+
+    public void CambiarParametrosYNuevoDetalle()
+    {
+        nuevoDetalle();
+        controlCalidadAgua.EntidadMuestreoAguaId = EntidadMuestreoAguaId;
+        CambiarParametros();
+    }
+
+    public void CambiarParametros()
+    {
+
+        entidadesMuestreoAguas = ListaEntidades.Where(e => e.EntidadesMuestreoAguaId == controlCalidadAgua.EntidadMuestreoAguaId).FirstOrDefault()!;
     }
 
     void nuevoDetalle()
     {
-
-        controlCalidadAgua.ControlCalidadAguaDetalle = new List<ControlCalidadAguaDetalle>();
-        DetallesRemovidos = new List<ControlCalidadAguaDetalle>();
-        var mensaje = new NotificationMessage
-            {
-                Severity = NotificationSeverity.Info,
-                Summary = "Cuidado",
-                Detail = "Al cambiar la entidad se eliminaran los detalles agregados.",
-                Duration = 4000
-            };
-        notificationService.Notify(mensaje);
+        if (EntidadMuestreoAguaId != controlCalidadAgua.EntidadMuestreoAguaId)
+        {
+            controlCalidadAgua.ControlCalidadAguaDetalle = new List<ControlCalidadAguaDetalle>();
+            DetallesRemovidos = new List<ControlCalidadAguaDetalle>();
+        }
     }
 
     public void Nuevo()
     {
+        EntidadMuestreoAguaId = 0;
+        IdBuscado = 0;
         this.controlCalidadAgua = new ControlCalidadAgua();
         DetallesRemovidos = new List<ControlCalidadAguaDetalle>();
     }
@@ -289,7 +264,7 @@
     {
         try
         {
-            await httpClient.GetFromJsonAsync<ControlCalidadAgua>($"api/ControlCalidadAguas/{controlCalidadAgua.ControlCalidadAguaId}");
+            await httpClient.GetFromJsonAsync<ControlCalidadAgua>($"api/ControlCalidadAguas/{IdBuscado}");
         }
         catch
         {
@@ -304,10 +279,12 @@
             this.Nuevo();
             return;
         }
-        var ControlCalidadAguaEncontrada = await httpClient.GetFromJsonAsync<ControlCalidadAgua>($"api/ControlCalidadAguas/{controlCalidadAgua.ControlCalidadAguaId}");
+        var ControlCalidadAguaEncontrada = await httpClient.GetFromJsonAsync<ControlCalidadAgua>($"api/ControlCalidadAguas/{IdBuscado}");
         if (ControlCalidadAguaEncontrada != null)
         {
             this.controlCalidadAgua = ControlCalidadAguaEncontrada;
+            EntidadMuestreoAguaId = controlCalidadAgua.EntidadMuestreoAguaId;
+            CambiarParametros();
             StateHasChanged();
         }
     }
@@ -332,7 +309,12 @@
             notificationService.Notify(mensaje);
             return;
         }
+
         var ControlCalidadAguaDevuelta = await response.Content.ReadFromJsonAsync<ControlCalidadAgua>();
+        foreach (var detalle in DetallesRemovidos)
+        {
+            await httpClient.DeleteAsync($"api/ControlCalidadAguas/DeleteAguaDetalle/{detalle.ControlCalidadAguaDetalleId}");
+        }
         if (ControlCalidadAguaDevuelta is not null)
         {
             var mensaje = new NotificationMessage
@@ -351,6 +333,7 @@
 
     public bool ValidarGuardar()
     {
+        bool valido = true;
         if (controlCalidadAgua.ControlCalidadAguaDetalle.Count == 0)
         {
             var mensaje = new NotificationMessage
@@ -361,7 +344,7 @@
                     Duration = 4000
                 };
             notificationService.Notify(mensaje);
-            return false;
+            valido = false;
         }
         if (controlCalidadAgua.ControlCalidadAguaDetalle.GroupBy(d => d.ParametroId).Any(group => group.Count() > 1))
         {
@@ -373,9 +356,9 @@
                     Duration = 4000
                 };
             notificationService.Notify(mensaje);
-            return false;
+            valido = false;
         }
-        if (controlCalidadAgua.TandaId != 1 || controlCalidadAgua.TandaId != 2)
+        if (controlCalidadAgua.TandaId != 1 && controlCalidadAgua.TandaId != 2)
         {
             var mensaje = new NotificationMessage
                 {
@@ -385,9 +368,21 @@
                     Duration = 4000
                 };
             notificationService.Notify(mensaje);
-            return false;
+            valido = false;
         }
-        return true;
+        if (controlCalidadAgua.EmpleadoId == 0)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Debe seleccionar un empleado.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            valido = false;
+        }
+        return valido;
     }
 
     public async Task Eliminar()
@@ -433,7 +428,6 @@
             notificationService.Notify(mensaje);
             return false;
         }
-
         if (Valor < 0)
         {
             var mensaje = new NotificationMessage
@@ -467,7 +461,7 @@
             {
                 Severity = NotificationSeverity.Warning,
                 Summary = "Cuidado",
-                Detail = "El valor del parametro que ha ingresado esta fuera de los parametros",
+                Detail = "El valor del parámetro que ha ingresado esta fuera de los parámetros",
                 Duration = 4000
             };
         notificationService.Notify(mensaje);
@@ -499,6 +493,7 @@
             controlCalidadAgua.ControlCalidadAguaDetalle.Add(detalle);
             Valor = 0;
             ParametroSeleccionado = 0;
+            DetallesRemovidos.Remove(detalle);
             StateHasChanged();
         }
     }
@@ -510,14 +505,14 @@
         Valor = detalleRemover.Valor;
         controlCalidadAgua.ControlCalidadAguaDetalle.Remove(detalleRemover);
         DetallesRemovidos.Add(detalleRemover);
-        await httpClient.DeleteAsync($"api/ControlCalidadAguas/DeleteAguaDetalle/{detalleRemover.ControlCalidadAguaDetalleId}");
         StateHasChanged();
     }
 
     public void Deshacer()
     {
         var detalleDeshacer = DetallesRemovidos.FirstOrDefault();
-        if (detalleDeshacer is null){
+        if (detalleDeshacer is null)
+        {
             var mensaje = new NotificationMessage
                 {
                     Severity = NotificationSeverity.Warning,
@@ -569,6 +564,9 @@
             if (documento != null)
             {
                 this.controlCalidadAgua = documento;
+                EntidadMuestreoAguaId = controlCalidadAgua.EntidadMuestreoAguaId;
+                IdBuscado = documento.ControlCalidadAguaId;
+                CambiarParametros();
                 StateHasChanged();
             }
         }
@@ -578,4 +576,3 @@
         }
     }
 }
-

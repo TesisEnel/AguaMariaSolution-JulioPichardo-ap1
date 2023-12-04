@@ -1,7 +1,12 @@
 ﻿@page "/ConsultaReviews";
 @inject HttpClient httpClient
 @rendermode InteractiveAuto
+<PageTitle>Cosulta de Reviews</PageTitle>
 <div class="card-header row">
+    <div class="card-header d-flex align-items-center">
+        <img src="AguaMariaLogo.png" class="img-logo" />
+        <h1>Consulta de Reviews</h1>
+    </div>
     <div class="col-md-4">
         <label>Desde: </label>
         <InputDate @bind-Value="Desde" class="form-control id-input"></InputDate>
@@ -17,10 +22,10 @@
                 <Authorized>
                     <option value="1">Review Id</option>
                     <option value="2">Cliente</option>
+                    <option value="3">Producto</option>
                     <option value="4">Comentario</option>
                 </Authorized>
             </AuthorizeView>
-            <option value="3">Producto</option>
             <option value="5">Valoraci&oacute;n</option>
         </InputSelect>
         <div class="input-group-append">
@@ -140,26 +145,30 @@
         {
             var listaReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews/");
             ListaReviews = listaReviews?.Where(r => r.ReviewId == reviews!.ReviewId && r.Fecha.Date >= Desde.Date && r.Fecha.Date <= Hasta.Date).ToList();
-        }else 
+        }
+        else
         if (Filtro == 2 && reviews!.ClienteId > 0)
         {
             var listaReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews/");
             ListaReviews = listaReviews?.Where(r => r.ClienteId == reviews!.ClienteId && r.Fecha.Date >= Desde.Date && r.Fecha.Date <= Hasta.Date).ToList();
-        }else
-        if(Filtro == 3 && reviews!.ProductoId > 0)
+        }
+        else
+        if (Filtro == 3 && reviews!.ProductoId > 0)
         {
             var listaReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews/");
             ListaReviews = listaReviews?.Where(r => r.ProductoId == reviews!.ProductoId && r.Fecha.Date >= Desde.Date && r.Fecha.Date <= Hasta.Date).ToList();
-        }else
-        if(Filtro == 4 && !string.IsNullOrEmpty(reviews!.Comentario))
+        }
+        else
+        if (Filtro == 4 && !string.IsNullOrEmpty(reviews!.Comentario))
         {
             var comentarioBusqueda = reviews!.Comentario.ToLower();
             ListaReviews = (await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews"))!
                 .Where(t => t.Comentario != null && t.Comentario.ToLower().Contains(comentarioBusqueda) && t.Fecha >= Desde.Date && t.Fecha <= Hasta)
         .ToList();
             StateHasChanged();
-        }else
-        if(Filtro == 5 && reviews!.Valoración > 0)
+        }
+        else
+        if (Filtro == 5 && reviews!.Valoración > 0)
         {
             var listaReviews = await httpClient.GetFromJsonAsync<List<Reviews>>($"api/Reviews/");
             ListaReviews = listaReviews?.Where(r => r.Valoración == reviews!.Valoración && r.Fecha.Date >= Desde.Date && r.Fecha.Date <= Hasta.Date).ToList();

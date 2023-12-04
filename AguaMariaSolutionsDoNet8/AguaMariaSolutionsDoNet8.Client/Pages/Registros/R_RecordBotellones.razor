@@ -4,31 +4,50 @@
 @inject NotificationService notificationService;
 @attribute [Authorize]
 @rendermode InteractiveAuto
+<PageTitle>Registro de RecordLavadoraBotellones</PageTitle>
 <RadzenNotification />
 <EditForm Model="recordLavadoraBotellones" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="card">
         <div class="card-header d-flex align-items-center">
             <img src="AguaMariaLogo.png" class="img-logo" />
-            <h1>Registro de RecordLavadoraBotellones</h1>
+            <h1>Registro de Record Lavadora Botellones</h1>
         </div>
         <div class="card-body">
-            <label>ID:</label>
-            <div class="input-group">
-                <InputNumber @bind-Value="recordLavadoraBotellones.RecordId" class="id-input"></InputNumber>
-                <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
+                <label class="form-label">Documento Id</label>
+                <div class="input-group mb-4">
+                    <InputNumber @bind-Value="IdBuscado" class="form-control" aria-describedby="BotonBuscar" />
+                    <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="bi bi-search" /></button>
+                </div>
             </div>
+            <AuthorizeView Roles="Empleado" Context="Empleado">
+                <Authorized>
+                    <br />
+                    <div class="text-center">
+                        <label>Fecha registrado</label>
+                        <h5>@recordLavadoraBotellones.Fecha</h5>
+                    </div>
+                    <br />
+                </Authorized>
+            </AuthorizeView>
+
+
             <div class="row">
                 <div class="col-md-6">
                     <label>EmpleadoId:</label>
                     <InputNumber @bind-Value="recordLavadoraBotellones.EmpleadoId" class="form-control"></InputNumber>
                     <ValidationMessage For="@(() => recordLavadoraBotellones.EmpleadoId)" />
                 </div>
-                <div class="col-md-6">
-                    <label>Fecha:</label>
-                    <InputDate @bind-Value="recordLavadoraBotellones.Fecha" class="form-control"></InputDate>
-                    <ValidationMessage For="@(() => recordLavadoraBotellones.Fecha)" />
-                </div>
+                <AuthorizeView Roles="Admin" Context="Admin">
+                    <Authorized>
+                        <div class="col-md-6">
+                            <label>Fecha:</label>
+                            <InputDate @bind-Value="recordLavadoraBotellones.Fecha" class="form-control"></InputDate>
+                            <ValidationMessage For="@(() => recordLavadoraBotellones.Fecha)" />
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
                 <div class="col-md-6">
                     <label>Temperatura °F:</label>
                     <InputNumber @bind-Value="recordLavadoraBotellones.Temperatura" class="form-control" placeholder="120°F" @onblur="Advertencia"></InputNumber>
@@ -60,10 +79,14 @@
                 </div>
             </div>
         </div>
-        <div class="card-footer">
-            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
-            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
-            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+        <div class="card-footer text-center">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="bi bi-file-earmark-diff-fill" /></button>
+            <button class="btn btn-success">Guardar <i class="bi bi-floppy-fill" /></button>
+            <AuthorizeView Roles="Admin" Context="Admin">
+                <Authorized>
+                    <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="bi bi-trash-fill" /></button>
+                </Authorized>
+            </AuthorizeView>
         </div>
     </div>
 </EditForm>
@@ -74,7 +97,7 @@
     [Parameter]
 
     public int RecordId { get; set; }
-
+    public int IdBuscado { get; set; }
     public RecordLavadoraBotellones recordLavadoraBotellones { get; set; } = new RecordLavadoraBotellones();
 
     protected override async Task OnInitializedAsync()
@@ -82,7 +105,12 @@
         if (RecordId > 0)
         {
             this.recordLavadoraBotellones.RecordId = RecordId;
+            IdBuscado = RecordId;
             await Buscar();
+        }
+        else
+        {
+            await BuscarUltimoDocumento();
         }
     }
 
@@ -90,10 +118,10 @@
     {
         var recordIdEncontrado = (await httpClient.GetFromJsonAsync<List<RecordLavadoraBotellones>>($"api/RecordLavadoraBotellones"))!
         .ToList()
-        .Any(c => c.RecordId == recordLavadoraBotellones.RecordId);
+        .Any(c => c.RecordId == IdBuscado);
         if (recordIdEncontrado)
         {
-            var recordEncontrado = await httpClient.GetFromJsonAsync<RecordLavadoraBotellones>($"api/RecordLavadoraBotellones/{recordLavadoraBotellones.RecordId}");
+            var recordEncontrado = await httpClient.GetFromJsonAsync<RecordLavadoraBotellones>($"api/RecordLavadoraBotellones/{IdBuscado}");
             if (recordEncontrado != null)
             {
                 this.recordLavadoraBotellones = recordEncontrado;
@@ -110,6 +138,7 @@
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
+            this.Nuevo();
             return;
         }
     }
@@ -243,5 +272,24 @@
 
         }
         Nuevo();
+    }
+
+    private async Task BuscarUltimoDocumento()
+    {
+        try
+        {
+            var documento = await httpClient.GetFromJsonAsync<RecordLavadoraBotellones>("api/RecordLavadoraBotellones/GetUltimoDocumento");
+            if (documento != null)
+            {
+                this.recordLavadoraBotellones = documento;
+
+                IdBuscado = documento.RecordId;
+                StateHasChanged();
+            }
+        }
+        catch
+        {
+            Nuevo();
+        }
     }
 }

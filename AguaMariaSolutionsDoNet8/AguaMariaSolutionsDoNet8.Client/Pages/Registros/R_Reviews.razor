@@ -6,6 +6,7 @@
 
 @rendermode InteractiveAuto
 <RadzenNotification />
+<PageTitle>Registo de Review</PageTitle>
 <EditForm Model="reviews" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="card">
@@ -75,10 +76,10 @@
                     </AuthorizeView>
                     <AuthorizeView Context="Cliente">
                         <NotAuthorized>
-                                 <h6>@ObtenerNombre(ProductoId)</h6>          
-                       </NotAuthorized>
+                            <h6>@ObtenerNombre(ProductoId)</h6>
+                        </NotAuthorized>
                     </AuthorizeView>
-                    
+
                 </div>
                 <div class="col-md-5">
                     <label>Fecha del botellon</label>
@@ -124,9 +125,9 @@
         {
             ListaProductos = productos;
         }
-        if(ProductoId == 0)
+        if (ProductoId == 0)
         {
-            navManager.NavigateTo("/ConsultaProducto",true);
+            navManager.NavigateTo("/ConsultaProducto", true);
         }
         if (ProductoId > 0)
         {

@@ -6,7 +6,7 @@
 @inject NotificationService notificationService;
 @inject NavigationManager navManager
 @attribute [Authorize(Roles = "Admin")]
-
+<PageTitle>Registro Review de Admins</PageTitle>
 @rendermode InteractiveAuto
 <RadzenNotification />
 <EditForm Model="reviews" OnValidSubmit="Guardar">
@@ -119,7 +119,7 @@
         {
             ListaProductos = productos;
         }
-        if(ProductoId > 0)
+        if (ProductoId > 0)
         {
             this.reviews.ProductoId = ProductoId;
             await Buscar();

@@ -2,15 +2,35 @@
 @inject HttpClient httpClient
 @attribute [Authorize]
 @rendermode InteractiveAuto
-<div class="card-header row">
-    <div class="col-md-4">
-        <label>Desde: </label>
-        <InputDate @bind-Value="Desde" class="form-control id-input"></InputDate>
+<PageTitle>Cosnulta de  Control Calidad Del Producto Terminado</PageTitle>
+<div class="card">
+    <div class="card-header d-flex align-items-center">
+        <img src="AguaMariaLogo.png" class="img-logo" />
+        <h1>Registro Control Calidad Del Producto Terminado</h1>
     </div>
-    <div class="col-md-4">
-        <label>Hasta: </label>
-        <InputDate @bind-Value="Hasta" class="form-control id-input"></InputDate>
-    </div>
+    <div class="card-body">
+        <div class="input-group-text">
+
+            <label class="form-control-label col-1">Desde:</label>
+            <div class="col-3">
+                <input class="form-control" type="date" @bind="Desde" />
+            </div>
+
+            <label class="form-control-label col-1">Hasta:</label>
+            <div class="col-3">
+                <input class="form-control" type="date" @bind="Hasta" />
+            </div>
+
+            <div class="col-5">
+                <button type="button" @onclick="Buscar" class="btn btn-primary  ">
+                    <i class="bi bi-search" />
+                    <br /> Buscar
+                </button>
+            </div>
+
+        </div>
+        </div>
+        <div class="col-1"></div>
     <label>Filtrar Por:</label>
     <div class="col-md-6 input-group filter-input">
         <InputSelect @bind-Value="Filtro" class="form-select">
@@ -18,9 +38,6 @@
             <option value="2">Acción Tomada</option>
             <option value="3">Empleado Id</option>
         </InputSelect>
-        <div class="input-group-append">
-            <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
-        </div>
     </div>
     <div class="col-md-6">
         @switch (Filtro)
@@ -36,7 +53,7 @@
                 break;
         }
     </div>
-</div>
+
 
 @if (ListaProductosTerminados is not null)
 {
@@ -71,6 +88,7 @@
         </table>
     </div>
 }
+</div>
 
 
 @code {

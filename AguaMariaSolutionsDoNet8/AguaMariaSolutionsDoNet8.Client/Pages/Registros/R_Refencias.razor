@@ -4,10 +4,10 @@
 @inject NotificationService notificationService
 @attribute [Authorize(Roles = "Admin")]
 @rendermode InteractiveAuto
-<RadzenNotification/>
+<RadzenNotification />
 <PageTitle>Registro de Referencias</PageTitle>
 
-<EditForm Model="Referencia" OnValidSubmit="Guardar">
+<EditForm Model="referencia" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="card">
         <div class="card-header d-flex align-items-center">
@@ -19,13 +19,13 @@
                 <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
                     <label>Referencia Id</label>
                     <div class="input-group mb-3">
-                        <InputNumber @bind-Value="Referencia.ReferenciaId" class="form-control" aria-describedby="BotonBuscar" />
+                        <InputNumber @bind-Value="referencia.ReferenciaId" class="form-control" aria-describedby="BotonBuscar" />
                         <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="bi bi-search" /></button>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <label>Parametro:</label>
-                    <InputSelect @bind-Value="Referencia.ParametroId" class="form-control">
+                    <InputSelect @bind-Value="referencia.ParametroId" class="form-control">
                         <option value="-1" hidden selected>Seleccione</option>
                         @foreach (var p in ListaParametros)
                         {
@@ -35,14 +35,14 @@
                 </div>
                 <div class="col-md-6">
                     <label>Descripci&oacute;n:</label>
-                    <InputText @bind-Value="Referencia.Descripción" class="form-control"></InputText>
-                    <ValidationMessage For="@(() => Referencia.Descripción)" />
+                    <InputText @bind-Value="referencia.Descripción" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => referencia.Descripción)" />
                 </div>
             </div>
         </div>
 
         @*Campos:*@
-        
+
         <fieldset class="border-secondary border border-1">
             <h3 class="text-center">Buscar Referencias</h3>
             <br />
@@ -147,9 +147,9 @@
         </fieldset>
 
         <div class="card-footer text-center">
-            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
-            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
-            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="bi bi-file-earmark-diff-fill" /></button>
+            <button class="btn btn-success">Guardar <i class="bi bi-floppy-fill" /></button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="bi bi-trash-fill" /></button>
         </div>
     </div>
 </EditForm>
@@ -159,7 +159,7 @@
     [Parameter]
     public int ReferenciaId { get; set; }
 
-    public Referencias Referencia { get; set; } = new Referencias();
+    public Referencias referencia { get; set; } = new Referencias();
     public List<Referencias> ListaReferencia { get; set; } = new List<Referencias>();
     public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
 
@@ -175,7 +175,7 @@
         await BuscarParametros();
         if (ReferenciaId > 0)
         {
-            this.Referencia.ReferenciaId = ReferenciaId;
+            this.referencia.ReferenciaId = ReferenciaId;
             await Buscar();
         }
 
@@ -183,7 +183,7 @@
 
     public async void Nuevo()
     {
-        this.Referencia = new Referencias();
+        this.referencia = new Referencias();
         await BuscarParametros();
         await BuscarValoresRef();
 
@@ -199,9 +199,9 @@
     {
         try
         {
-            await httpClient.GetFromJsonAsync<Referencias>($"api/Referencias/{Referencia.ReferenciaId}");
+            await httpClient.GetFromJsonAsync<Referencias>($"api/Referencias/{referencia.ReferenciaId}");
         }
-        catch 
+        catch
         {
             var mensaje = new NotificationMessage
                 {
@@ -215,10 +215,10 @@
             return;
         }
 
-        var EntidadesMuestreoAguaEncontrada = await httpClient.GetFromJsonAsync<Referencias>($"api/Referencias/{Referencia.ReferenciaId}");
+        var EntidadesMuestreoAguaEncontrada = await httpClient.GetFromJsonAsync<Referencias>($"api/Referencias/{referencia.ReferenciaId}");
         if (EntidadesMuestreoAguaEncontrada != null)
         {
-            this.Referencia = EntidadesMuestreoAguaEncontrada;
+            this.referencia = EntidadesMuestreoAguaEncontrada;
             StateHasChanged();
         }
     }
@@ -229,7 +229,7 @@
         {
             return;
         }
-        using var response = await httpClient.PostAsJsonAsync("api/Referencias", Referencia);
+        using var response = await httpClient.PostAsJsonAsync("api/Referencias", referencia);
         if (!response.IsSuccessStatusCode)
         {
             var mensaje = new NotificationMessage
@@ -261,19 +261,7 @@
 
     public bool ValidarGuardar()
     {
-        if (Referencia.ParametroId != -1 )
-        {
-            var mensaje = new NotificationMessage
-            {
-                Severity = NotificationSeverity.Error,
-                Summary = "Error",
-                Detail = "No se puede guardar un registro sin parametro.",
-                Duration = 4000
-            };
-            notificationService.Notify(mensaje);
-            return false;
-        }
-        if (string.IsNullOrEmpty(Referencia.Descripción) && string.IsNullOrWhiteSpace(Referencia.Descripción))
+        if (referencia.ParametroId == -1)
         {
             var mensaje = new NotificationMessage
                 {
@@ -285,13 +273,25 @@
             notificationService.Notify(mensaje);
             return false;
         }
-        Referencia.Descripción = Referencia.Descripción.Trim();
+        if (string.IsNullOrEmpty(referencia.Descripción) && string.IsNullOrWhiteSpace(referencia.Descripción))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se puede guardar un registro sin parametro.",
+                    Duration = 4000
+                };
+            notificationService.Notify(mensaje);
+            return false;
+        }
+        referencia.Descripción = referencia.Descripción.Trim();
         return true;
     }
 
     public async Task Eliminar()
     {
-        using var response = await httpClient.DeleteAsync($"api/Referencias/{Referencia.ReferenciaId}");
+        using var response = await httpClient.DeleteAsync($"api/Referencias/{referencia.ReferenciaId}");
         if (!response.IsSuccessStatusCode)
         {
             var mensaje = new NotificationMessage
@@ -305,7 +305,7 @@
             return;
         }
         else
-        {   
+        {
             var mensaje = new NotificationMessage
                 {
                     Severity = NotificationSeverity.Success,
@@ -374,7 +374,7 @@
         }
 
 
-        ListaParametros = ListaParametros.Where(p => (FiltroP == 0 || p.ParametroId== FiltroP) &&
+        ListaParametros = ListaParametros.Where(p => (FiltroP == 0 || p.ParametroId == FiltroP) &&
                                          (string.IsNullOrEmpty(DescripciónP) || (p.Descripción != null && p.Descripción
                                                                                                         .ToLower()
                                                                                                         .Contains(DescripciónP.ToLower()))))
@@ -395,7 +395,8 @@
             return;
         }
         Nuevo();
-        this.Referencia = Referencia;
+        this.referencia = Referencia;
+
         StateHasChanged();
     }
 
@@ -405,7 +406,7 @@
         {
             return;
         }
-        this.Referencia.ParametroId = parametros.ParametroId;
+        this.referencia.ParametroId = parametros.ParametroId;
         StateHasChanged();
     }
 

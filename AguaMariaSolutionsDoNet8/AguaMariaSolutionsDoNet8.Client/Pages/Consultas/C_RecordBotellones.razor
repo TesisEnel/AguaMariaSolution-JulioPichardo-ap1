@@ -2,6 +2,34 @@
 @inject HttpClient httpClient
 @attribute [Authorize]
 @rendermode InteractiveAuto
+<PageTitle>Consulta de Record de Lavadora de botellones de agua </PageTitle>
+<div class="card">
+    <div class="card-header d-flex align-items-center">
+        <img src="AguaMariaLogo.png" class="img-logo" />
+        <h1>Record de Lavadora de botellones de agua</h1>
+    </div>
+    <div class="card-body">
+        <div class="input-group-text">
+
+            <label class="form-control-label col-1">Desde:</label>
+            <div class="col-3">
+                <input class="form-control" type="date" @bind="Desde" />
+            </div>
+
+            <label class="form-control-label col-1">Hasta:</label>
+            <div class="col-3">
+                <input class="form-control" type="date" @bind="Hasta" />
+            </div>
+
+            <div class="col-5">
+                <button type="button" @onclick="Buscar" class="btn btn-primary  ">
+                    <i class="bi bi-search" />
+                    <br /> Buscar
+                </button>
+            </div>
+
+        </div>
+        </div>
 <div class="card-header row">
     <label>Filtrar ID:</label>
     <div class="col-md-6 input-group filter-input">
@@ -27,7 +55,7 @@
                     <th>Alcalinidad & Enjuague</th>
                     <th>Desinfectante y Concentraci&oacute;n</th>
                     <th>Acci&oacute;n Tomada</th>
-                    <th></th>
+                    <th>Ver</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,7 +71,7 @@
                         <td>@RecordLavadoraBotellones.AlcalinidadEnjuague</td>
                         <td>@RecordLavadoraBotellones.DesinfectanteConcentración mg/l</td>
                         <td>@RecordLavadoraBotellones.AcciónTomada</td>
-                        <td><a href="RecordBotellones/@RecordLavadoraBotellones.RecordId">Ver</a></td>
+                        <td><a href="RecordBotellones/@RecordLavadoraBotellones.RecordId"><i class="bi bi-eye"></i></a></td>
                     </tr>
                 }
                 <tr>
@@ -53,7 +81,7 @@
         </table>
     </div>
 }
-
+</div>
 
 @code {
 
@@ -62,30 +90,34 @@
     public RecordLavadoraBotellones? recordLavadoraBotellones { get; set; } = new RecordLavadoraBotellones();
     public int Conteo { get; set; }
     public List<Empleados> ListaEmpleados { get; set; } = new List<Empleados>();
-
+    public DateTime Desde { get; set; }
+    public DateTime Hasta { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
-        var empleados = await httpClient.GetFromJsonAsync<List<Empleados>>("api/Empleados");
+         var empleados = await httpClient.GetFromJsonAsync<List<Empleados>>("api/Empleados");
+        Desde = DateTime.Now.AddMonths(-1);
+        Hasta = DateTime.Now;
+         if (empleados is not null)
+         {
+             ListaEmpleados = empleados;
+         }
+         await Buscar();
 
-        if (empleados is not null)
-        {
-            ListaEmpleados = empleados;
-        }
-        await Buscar();
-    }
+     }
 
     public async Task Buscar()
     {
         if (Filtro == 0)
         {
-            RecordLavadoraBotellones = await httpClient.GetFromJsonAsync<List<RecordLavadoraBotellones>>($"api/RecordLavadoraBotellones");
+            var listaRecords = await httpClient.GetFromJsonAsync<List<RecordLavadoraBotellones>>($"api/RecordLavadoraBotellones/");
+            RecordLavadoraBotellones = listaRecords?.Where(c =>  c.Fecha >= Desde && c.Fecha <= Hasta).ToList();
         }
         else
         {
             var listaRecords = await httpClient.GetFromJsonAsync<List<RecordLavadoraBotellones>>($"api/RecordLavadoraBotellones/");
-            RecordLavadoraBotellones = listaRecords?.Where(c => c.RecordId == Filtro).ToList();
+                    RecordLavadoraBotellones = listaRecords?.Where(c => c.RecordId == Filtro && c.Fecha >= Desde && c.Fecha <= Hasta).ToList();
         }
         Conteo = RecordLavadoraBotellones != null ? RecordLavadoraBotellones!.Count() : 0;
         StateHasChanged();

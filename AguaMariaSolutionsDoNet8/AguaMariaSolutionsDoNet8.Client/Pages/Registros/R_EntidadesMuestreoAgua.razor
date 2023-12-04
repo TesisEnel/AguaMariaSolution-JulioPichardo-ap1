@@ -3,7 +3,7 @@
 @inject HttpClient httpClient
 @inject NotificationService notificationService
 @attribute [Authorize(Roles = "Admin")]
-<RadzenNotification/>
+<RadzenNotification />
 @rendermode InteractiveAuto
 
 <PageTitle>Registro Entidades del Muestreo del Agua</PageTitle>
@@ -76,7 +76,7 @@
             <br />
             <div class="card-header row">
                 <div class="row">
-                
+
                     <div class="col-md-6">
                         <label>Filtrar por ID:</label>
                         <InputNumber @bind-Value="Filtro" class="form-control"></InputNumber>
@@ -126,7 +126,7 @@
 
         <div class="card-footer text-center">
             <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="bi bi-file-earmark-diff-fill" /></button>
-            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+            <button class="btn btn-success">Guardar <i class="bi bi-floppy-fill" /></button>
             <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="bi bi-trash-fill" /></button>
         </div>
     </div>
@@ -190,7 +190,7 @@
         {
             await httpClient.GetFromJsonAsync<EntidadesMuestreoAguas>($"api/EntidadesMuestreoAguas/{entidadesMuestreoAgua.EntidadesMuestreoAguaId}");
         }
-        catch 
+        catch
         {
             var mensaje = new NotificationMessage
                 {
@@ -236,7 +236,7 @@
         var EntidadesDevuelta = await response.Content.ReadFromJsonAsync<EntidadesMuestreoAguas>();
         if (EntidadesDevuelta is not null)
         {
-            foreach(var detalle in DetallesRemovidos)
+            foreach (var detalle in DetallesRemovidos)
             {
                 await httpClient.DeleteAsync($"api/ParametrosEntidadesMuestreoAguas/{detalle.Id}");
             }
@@ -259,12 +259,12 @@
         if (entidadesMuestreoAgua.ListaParametros.Count == 0)
         {
             var mensaje = new NotificationMessage
-            {
-                Severity = NotificationSeverity.Error,
-                Summary = "Error",
-                Detail = "No se puede guardar un registro sin parametros.",
-                Duration = 4000
-            };
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se puede guardar un registro sin parametros.",
+                    Duration = 4000
+                };
             notificationService.Notify(mensaje);
             return false;
         }
@@ -272,12 +272,12 @@
         if (entidadesMuestreoAgua.ListaParametros.GroupBy(d => d.ParametroId).Any(group => group.Count() > 1))
         {
             var mensaje = new NotificationMessage
-                    {
+                {
                     Severity = NotificationSeverity.Error,
                     Summary = "Error",
                     Detail = "No se puede guardar un registro con más de un mismo parametro.",
-                Duration = 4000
-            };
+                    Duration = 4000
+                };
             notificationService.Notify(mensaje);
             return false;
         }
@@ -287,21 +287,21 @@
     public async Task Eliminar()
     {
         var Detalles = entidadesMuestreoAgua.ListaParametros;
-        using var response = await httpClient.DeleteAsync($"api/EntidadesMuestreoAgua/{entidadesMuestreoAgua.EntidadesMuestreoAguaId}");
+        using var response = await httpClient.DeleteAsync($"api/EntidadesMuestreoAguas/{entidadesMuestreoAgua.EntidadesMuestreoAguaId}");
         if (!response.IsSuccessStatusCode)
         {
             var mensaje = new NotificationMessage
                 {
                     Severity = NotificationSeverity.Error,
                     Summary = "Error",
-                    Detail = "No se logro eliminar el registro. Error: " ?? response.ReasonPhrase,
+                    Detail = "No se logro eliminar el registro. Error: " ?? response.Content.ToString(),
                     Duration = 4000
                 };
             notificationService.Notify(mensaje);
             return;
         }
         else
-        {   
+        {
             foreach (var detalle in Detalles)
             {
                 await httpClient.DeleteAsync($"api/ParametrosEntidadesMuestreoAgua/{detalle.Id}");
@@ -336,12 +336,12 @@
         return true;
     }
 
-    public void AgregarDetalle(Parametros parametro )
+    public void AgregarDetalle(Parametros parametro)
     {
         var detalle = new ParametrosEntidadesMuestreoAguas
-        {
+            {
                 ParametroId = parametro.ParametroId,
-        };
+            };
         if (ValidarDetalle(detalle))
         {
             entidadesMuestreoAgua.ListaParametros.Add(detalle);
@@ -422,7 +422,7 @@
         }
         var ParametrosEncontrado = await httpClient.GetFromJsonAsync<List<Parametros>>($"api/Parametros");
 
-        
+
 
         if (ParametrosEncontrado != null)
         {

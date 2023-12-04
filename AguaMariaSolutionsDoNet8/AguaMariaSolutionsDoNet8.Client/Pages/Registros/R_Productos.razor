@@ -5,7 +5,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @rendermode InteractiveAuto
 <RadzenNotification />
-
+<PageTitle>Registro de Productos</PageTitle>
 <EditForm Model="productos" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="row">
@@ -40,12 +40,10 @@
                         }
                     </div>
                 </div>
-                <div class="card-footer">
-                    <div class="text-center">
-                        <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
-                        <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
-                        <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
-                    </div>
+                <div class="card-footer text-center">
+                    <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="bi bi-file-earmark-diff-fill" /></button>
+                    <button class="btn btn-success">Guardar <i class="bi bi-floppy-fill" /></button>
+                    <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="bi bi-trash-fill" /></button>
                 </div>
             </div>
         </div>

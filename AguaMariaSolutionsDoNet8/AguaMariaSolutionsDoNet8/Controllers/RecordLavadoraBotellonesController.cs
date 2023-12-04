@@ -25,10 +25,10 @@ namespace AguaMariaSolutionsDoNet8.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RecordLavadoraBotellones>>> GetRecordLavadoraBotellones()
         {
-          if (_context.RecordLavadoraBotellones == null)
-          {
-              return NotFound();
-          }
+            if (_context.RecordLavadoraBotellones == null)
+            {
+                return NotFound();
+            }
             return await _context.RecordLavadoraBotellones.ToListAsync();
         }
 
@@ -36,10 +36,10 @@ namespace AguaMariaSolutionsDoNet8.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<RecordLavadoraBotellones>> GetRecordLavadoraBotellones(int id)
         {
-          if (_context.RecordLavadoraBotellones == null)
-          {
-              return NotFound();
-          }
+            if (_context.RecordLavadoraBotellones == null)
+            {
+                return NotFound();
+            }
             var recordLavadoraBotellones = await _context.RecordLavadoraBotellones.FindAsync(id);
 
             if (recordLavadoraBotellones == null)
@@ -86,7 +86,7 @@ namespace AguaMariaSolutionsDoNet8.Controllers
         [HttpPost]
         public async Task<ActionResult<RecordLavadoraBotellones>> PostRecordLavadoraBotellones(RecordLavadoraBotellones recordLavadoraBotellones)
         {
-            if (RecordLavadoraBotellonesExists(recordLavadoraBotellones.RecordId))
+            if (!RecordLavadoraBotellonesExists(recordLavadoraBotellones.RecordId))
                 _context.RecordLavadoraBotellones.Add(recordLavadoraBotellones);
             else
                 _context.RecordLavadoraBotellones.Update(recordLavadoraBotellones);
@@ -119,6 +119,32 @@ namespace AguaMariaSolutionsDoNet8.Controllers
         private bool RecordLavadoraBotellonesExists(int id)
         {
             return (_context.RecordLavadoraBotellones?.Any(e => e.RecordId == id)).GetValueOrDefault();
+        }
+
+        [HttpGet("GetUltimoDocumento")]
+        public async Task<ActionResult<RecordLavadoraBotellones>> GetUltimoDocumento()
+        {
+            if (!_context.RecordLavadoraBotellones.Any())
+            {
+                return NotFound();
+            }
+
+            var recordDeBotellones = _context.RecordLavadoraBotellones
+                                        .OrderByDescending(c => c.Fecha)
+                                        .Take(1)
+                                        .FirstOrDefault();
+
+            if (recordDeBotellones == null)
+            {
+                return NotFound();
+            }
+
+            if (recordDeBotellones.Fecha.Date == DateTime.Now.Date)
+            {
+                return recordDeBotellones;
+            }
+
+            return NotFound();
         }
     }
 }
