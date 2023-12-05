@@ -396,6 +396,8 @@
         {
             Detalles.ProductoTerminadoId = productosTerminados.ProductoTerminadoId;
             productosTerminados.ProductoTerminadosDetalle.Add(Detalles);
+            if (DetallesRemovidos.Any(d => d.DetalleId == Detalles.DetalleId))
+                DetallesRemovidos.Remove(Detalles);
             ListaDetalles.Add(Detalles);
             Detalles.Pasó = ValidarSiPasoDetalle();
             Detalles = new ProductoTerminadosDetalle();
