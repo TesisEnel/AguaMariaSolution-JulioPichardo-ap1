@@ -1,7 +1,10 @@
 ﻿@page "/RegistroProductoTerminado";
 @page "/RegistroProductoTerminado/{ProductoTerminadoId:int}";
+@using System.Security.Claims
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 @attribute [Authorize]
 @rendermode InteractiveAuto
 <RadzenNotification />
@@ -45,11 +48,23 @@
 
 
 
-                <div class="col-md-4">
-                    <label>Empleado:</label>
-                    <InputNumber @bind-Value="productosTerminados.EmpleadoId" class="form-control"></InputNumber>
-                    <ValidationMessage For="@(() => productosTerminados.EmpleadoId)" />
-                </div>
+                <AuthorizeView Roles="Admin" Context="Admin">
+                    <Authorized>
+                        <div class="col-md-4">
+                            <label>Empleado Id:</label>
+                            <InputNumber @bind-Value="productosTerminados.EmpleadoId" class="form-control"></InputNumber>
+                            <ValidationMessage For="@(() => productosTerminados.EmpleadoId)" />
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Empleado" Context="Empleado">
+                    <Authorized>
+                        <div class="col-md-4">
+                            <label>Empleado Id:</label>
+                            <h5>@productosTerminados.EmpleadoId</h5>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
 
             </div>
         </div>
@@ -119,7 +134,7 @@
                 {
                     <tr>
                         <td>@detalle.ParametroId</td>
-                        <td>@ObtenerDescripción(detalle.ParametroId)</td>
+                        <td>@ObtenerDescripciónParámetro(detalle.ParametroId)</td>
                         <td>@ObtenerMínimo(detalle.ParametroId)</td>
                         <td>@ObtenerMáximo(detalle.ParametroId)</td>
                         <td>@detalle.Valor</td>
@@ -160,12 +175,13 @@
     public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
     public List<ProductoTerminadosDetalle> DetallesRemovidos { get; set; } = new List<ProductoTerminadosDetalle>();
     public List<ProductoTerminadosDetalle> ListaDetalles { get; set; } = new List<ProductoTerminadosDetalle>();
+    public List<ParametrosCreados> ListaParametrosCreados = new List<ParametrosCreados>();
     public int IdBuscado { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         var Parametros = await httpClient.GetFromJsonAsync<List<Parametros>>("api/Parametros");
-
+        await CargarParametrosCreados();
         if (Parametros is not null)
         {
             ListaParametros = Parametros;
@@ -191,10 +207,7 @@
         return new ControlCalidadProductoTerminado();
     }
 
-    public string ObtenerDescripción(int Id)
-    {
-        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Descripción!;
-    }
+
 
     public async Task Buscar()
     {
@@ -221,7 +234,7 @@
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
-            this.Nuevo();
+            await this.Nuevo();
             return;
         }
     }
@@ -294,17 +307,18 @@
             notificationService.Notify(mensaje);
             productosTerminados = controlCalidadProductoTerminado;
             StateHasChanged();
-            this.Nuevo();
+            await this.Nuevo();
         }
     }
 
-    public void Nuevo()
+    public async Task Nuevo()
     {
         this.productosTerminados = new ControlCalidadProductoTerminado();
         IdBuscado = 0;
         this.Detalles = new ProductoTerminadosDetalle();
         DetallesRemovidos = new List<ProductoTerminadosDetalle>();
         ListaDetalles = new List<ProductoTerminadosDetalle>();
+        await GetEmpleado();
     }
 
     public async Task Eliminar()
@@ -333,7 +347,7 @@
                 };
             notificationService.Notify(mensaje);
         }
-        Nuevo();
+        await Nuevo();
     }
 
     public bool ValidarDetalle()
@@ -467,14 +481,24 @@
         return producto ?? new Parametros();
     }
 
+    public string ObtenerDescripciónParámetro(int Id)
+    {
+        return ListaParametrosCreados
+                                      .Where(p => p.ParametroId == Id && p.Fecha <= productosTerminados.Fecha)
+                                      .OrderByDescending(p => p.Fecha)
+                                      .FirstOrDefault()!.Descripción;
+    }
+
     public float ObtenerMínimo(int Id)
     {
-        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Mínimo;
+        return ListaParametrosCreados.Where(p => p.ParametroId == Id && p.Fecha <= productosTerminados.Fecha)
+                                      .OrderByDescending(p => p.Fecha).FirstOrDefault()!.Mínimo;
     }
 
     public float ObtenerMáximo(int Id)
     {
-        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Máximo;
+        return ListaParametrosCreados.Where(p => p.ParametroId == Id && p.Fecha <= productosTerminados.Fecha)
+                                      .OrderByDescending(p => p.Fecha).FirstOrDefault()!.Máximo;
     }
 
     private async Task BuscarUltimoDocumento()
@@ -491,9 +515,27 @@
         }
         catch
         {
-            Nuevo();
+            await Nuevo();
         }
     }
 
+    private async Task CargarParametrosCreados()
+    {
+        var encontrados = await httpClient.GetFromJsonAsync<List<ParametrosCreados>>("api/ParametrosCreados");
+        if (encontrados != null)
+            ListaParametrosCreados = encontrados;
+    }
+
+    public async Task GetEmpleado()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var LisEmpleado = await httpClient.GetFromJsonAsync<List<Empleados>>("api/Empleados");
+        var correoEmpleado = authState.User?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        var empleado = LisEmpleado.Where(e => e.Email == correoEmpleado).FirstOrDefault();
+        if (empleado != null)
+        {
+            productosTerminados.EmpleadoId = empleado.EmpleadoId;
+        }
+    }
 }
 

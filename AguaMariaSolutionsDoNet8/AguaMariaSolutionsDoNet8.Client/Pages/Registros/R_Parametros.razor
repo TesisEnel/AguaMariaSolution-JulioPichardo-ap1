@@ -13,6 +13,7 @@
             <img src="AguaMariaLogo.png" class="img-logo" />
             <h1>Registro de Par&aacute;metros</h1>
         </div>
+
         <div class="card-body">
             <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
                 <label>Par&aacute;metro Id</label>
@@ -168,6 +169,15 @@
                 };
             notificationService.Notify(mensaje);
             Parametro = ParametroDevuelto;
+            ParametroDevuelto = await httpClient.GetFromJsonAsync<Parametros>($"api/Parametros/{Parametro.ParametroId}");
+            ParametrosCreados Creado = new ParametrosCreados();
+            Creado.Descripción = Parametro.Descripción;
+            Creado.Mínimo = Parametro.Mínimo;
+            Creado.Máximo = Parametro.Máximo;
+            Creado.ParametroId = Parametro.ParametroId;
+            Creado.Fecha = DateTime.Now;
+            await httpClient.PostAsJsonAsync("api/ParametrosCreados", Creado);
+            
             this.Nuevo();
             StateHasChanged();
         }
@@ -225,6 +235,7 @@
     {
 
         bool resultado = true;
+
 
         foreach (var entidad in ListaEntidades)
         {

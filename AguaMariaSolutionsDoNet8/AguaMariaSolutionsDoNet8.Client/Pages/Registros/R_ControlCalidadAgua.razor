@@ -2,6 +2,8 @@
 @page "/Registros/ControlCalidadAgua/{ControlCalidadAguaId:int}"
 @inject HttpClient httpClient
 @inject NotificationService notificationService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims;
 @attribute [Authorize]
 @rendermode InteractiveAuto
 <RadzenNotification />
@@ -45,12 +47,24 @@
                         </Authorized>
                     </AuthorizeView>
                 </div>
-                <div class="col-md-4">
-                    <label>Empleado:</label>
-                    <InputNumber @bind-Value="controlCalidadAgua.EmpleadoId" class="form-control"></InputNumber>
-                    <ValidationMessage For="@(() => controlCalidadAgua.EmpleadoId)" />
-                </div>
 
+                <AuthorizeView Roles="Admin" Context="Admin">
+                    <Authorized>
+                        <div class="col-md-4">
+                            <label>Empleado Id:</label>
+                            <InputNumber @bind-Value="controlCalidadAgua.EmpleadoId" class="form-control"></InputNumber>
+                            <ValidationMessage For="@(() => controlCalidadAgua.EmpleadoId)" />
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Empleado" Context="Empleado">
+                    <Authorized>
+                        <div class="col-md-4">
+                            <label>Empleado Id:</label>
+                            <h5>@controlCalidadAgua.EmpleadoId</h5>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
                 <div class="col-md-4">
                     <label>Tanda:</label>
                     <InputSelect @bind-Value="controlCalidadAgua.TandaId" class="form-select">
@@ -186,6 +200,7 @@
     public List<Parametros> ListaParametros { get; set; } = new List<Parametros>();
     public List<EntidadesMuestreoAguas> ListaEntidades { get; set; } = new List<EntidadesMuestreoAguas>();
     public List<ControlCalidadAguaDetalle> DetallesRemovidos { get; set; } = new List<ControlCalidadAguaDetalle>();
+    public List<ParametrosCreados> ListaParametrosCreados = new List<ParametrosCreados>();
 
 
     public int ParametroSeleccionado;
@@ -193,6 +208,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await CargarParametrosCreados();
         await CargarParametros();
         await CargarEntidades();
 
@@ -232,32 +248,40 @@
         }
     }
 
-    public void Nuevo()
+    public async Task Nuevo()
     {
         EntidadMuestreoAguaId = 0;
         IdBuscado = 0;
         this.controlCalidadAgua = new ControlCalidadAgua();
         DetallesRemovidos = new List<ControlCalidadAguaDetalle>();
+        await GetEmpleado();
     }
 
-    public string ObtenerDescripciónParámetro(int Id)
-    {
-        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Descripción!;
-    }
+
 
     public string ObtenerDescripciónEntidad(int Id)
     {
         return ListaEntidades.Where(p => p.EntidadesMuestreoAguaId == Id).FirstOrDefault()!.Descripción!;
     }
 
+    public string ObtenerDescripciónParámetro(int Id)
+    {
+        return ListaParametrosCreados
+                                      .Where(p => p.ParametroId == Id && p.Fecha <= controlCalidadAgua.Fecha)
+                                      .OrderByDescending(p => p.Fecha)
+                                      .FirstOrDefault()!.Descripción!;
+    }
+
     public float ObtenerMínimo(int Id)
     {
-        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Mínimo;
+        return ListaParametrosCreados.Where(p => p.ParametroId == Id && p.Fecha <= controlCalidadAgua.Fecha)
+                                      .OrderByDescending(p => p.Fecha).FirstOrDefault()!.Mínimo;
     }
 
     public float ObtenerMáximo(int Id)
     {
-        return ListaParametros.Where(p => p.ParametroId == Id).FirstOrDefault()!.Máximo;
+        return ListaParametrosCreados.Where(p => p.ParametroId == Id && p.Fecha <= controlCalidadAgua.Fecha)
+                                      .OrderByDescending(p => p.Fecha).FirstOrDefault()!.Máximo;
     }
 
     public async Task Buscar()
@@ -276,7 +300,7 @@
                     Duration = 4000
                 };
             notificationService.Notify(mensaje);
-            this.Nuevo();
+            await this.Nuevo();
             return;
         }
         var ControlCalidadAguaEncontrada = await httpClient.GetFromJsonAsync<ControlCalidadAgua>($"api/ControlCalidadAguas/{IdBuscado}");
@@ -327,7 +351,7 @@
             notificationService.Notify(mensaje);
             controlCalidadAgua = ControlCalidadAguaDevuelta;
             StateHasChanged();
-            this.Nuevo();
+            await this.Nuevo();
         }
     }
 
@@ -411,7 +435,7 @@
                 };
             notificationService.Notify(mensaje);
         }
-        Nuevo();
+        await Nuevo();
     }
 
     public bool ValidarDetalle()
@@ -556,6 +580,13 @@
             ListaEntidades = encontrados;
     }
 
+
+    private async Task CargarParametrosCreados()
+    {
+        var encontrados = await httpClient.GetFromJsonAsync<List<ParametrosCreados>>("api/ParametrosCreados");
+        if (encontrados != null)
+            ListaParametrosCreados = encontrados;
+    }
     private async Task BuscarUltimoDocumento()
     {
         try
@@ -572,7 +603,22 @@
         }
         catch
         {
-            Nuevo();
+            await Nuevo();
         }
     }
+
+    public async Task GetEmpleado()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var LisEmpleado = await httpClient.GetFromJsonAsync<List<Empleados>>("api/Empleados");
+        var correoEmpleado = authState.User?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        var empleado = LisEmpleado.Where(e => e.Email == correoEmpleado).FirstOrDefault();
+        if (empleado != null)
+        {
+            controlCalidadAgua.EmpleadoId = empleado.EmpleadoId;
+        }
+    }
+
+
+
 }

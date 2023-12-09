@@ -1,7 +1,9 @@
 ﻿@page "/RecordBotellones";
 @page "/RecordBotellones/{RecordId:int}";
+@using System.Security.Claims
 @inject HttpClient httpClient
 @inject NotificationService notificationService;
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @attribute [Authorize]
 @rendermode InteractiveAuto
 <PageTitle>Registro de RecordLavadoraBotellones</PageTitle>
@@ -34,11 +36,23 @@
 
 
             <div class="row">
-                <div class="col-md-6">
-                    <label>EmpleadoId:</label>
-                    <InputNumber @bind-Value="recordLavadoraBotellones.EmpleadoId" class="form-control"></InputNumber>
-                    <ValidationMessage For="@(() => recordLavadoraBotellones.EmpleadoId)" />
-                </div>
+                <AuthorizeView Roles="Admin" Context="Admin">
+                    <Authorized>
+                        <div class="col-md-6">
+                            <label>Empleado Id:</label>
+                            <InputNumber @bind-Value="recordLavadoraBotellones.EmpleadoId" class="form-control"></InputNumber>
+                            <ValidationMessage For="@(() => recordLavadoraBotellones.EmpleadoId)" />
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Empleado" Context="Empleado">
+                    <Authorized>
+                        <div class="col-md-6">
+                            <label>Empleado Id:</label>
+                            <h5>@recordLavadoraBotellones.EmpleadoId</h5>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
                 <AuthorizeView Roles="Admin" Context="Admin">
                     <Authorized>
                         <div class="col-md-6">
@@ -138,7 +152,7 @@
                     Duration = 4_000
                 };
             notificationService.Notify(mensaje);
-            this.Nuevo();
+            await this.Nuevo();
             return;
         }
     }
@@ -234,14 +248,15 @@
                 };
             notificationService.Notify(mensaje);
             recordLavadoraBotellones = recordDevuelto;
-            this.Nuevo();
+            await this.Nuevo();
             StateHasChanged();
         }
     }
 
-    public void Nuevo()
+    public async Task Nuevo()
     {
         this.recordLavadoraBotellones = new RecordLavadoraBotellones();
+        await GetEmpleado();
     }
 
     public async Task Eliminar()
@@ -271,7 +286,7 @@
             notificationService.Notify(mensaje);
 
         }
-        Nuevo();
+        await Nuevo();
     }
 
     private async Task BuscarUltimoDocumento()
@@ -289,7 +304,19 @@
         }
         catch
         {
-            Nuevo();
+            await Nuevo();
+        }
+    }
+
+    public async Task GetEmpleado()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var LisEmpleado = await httpClient.GetFromJsonAsync<List<Empleados>>("api/Empleados");
+        var correoEmpleado = authState.User?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        var empleado = LisEmpleado.Where(e => e.Email == correoEmpleado).FirstOrDefault();
+        if (empleado != null)
+        {
+            recordLavadoraBotellones.EmpleadoId = empleado.EmpleadoId;
         }
     }
 }

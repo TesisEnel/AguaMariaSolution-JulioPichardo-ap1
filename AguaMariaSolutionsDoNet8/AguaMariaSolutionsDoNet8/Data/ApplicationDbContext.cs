@@ -20,6 +20,7 @@ namespace AguaMariaSolutionsDoNet8.Data
         public DbSet<EntidadesMuestreoAguas> EntidadesMuestreoAguas { get; set; }
         public DbSet<ParametrosEntidadesMuestreoAguas> ParametrosEntidadesMuestreoAguas { get; set; }
         public DbSet<Referencias> Referencias { get; set; }
+        public DbSet<ParametrosCreados> ParametrosCreados { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
